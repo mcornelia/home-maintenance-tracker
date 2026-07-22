@@ -2,7 +2,6 @@ import express from "express";
 import fs from "node:fs";
 import path from "node:path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { createServer as createViteServer } from "vite";
 import { registerMutationRoutes } from "./api/mutations";
 import { registerAuthRoutes, requireSession } from "./auth/session";
 import { runNightlyBackup } from "./backup/service";
@@ -45,6 +44,7 @@ app.post("/api/system/backup", requireSession(database.sqlite), async (_request,
 });
 
 if (process.env.NODE_ENV === "development") {
+  const { createServer: createViteServer } = await import("vite");
   const vite = await createViteServer({
     server: { middlewareMode: true },
     appType: "spa",
