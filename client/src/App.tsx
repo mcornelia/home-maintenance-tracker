@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Editor } from "./Editor";
 import type { DashboardData, DueState, EditorState } from "./dashboard-types";
+import { initials } from "./initials";
 
 const stateLabels: Record<DueState, string> = {
   overdue: "Overdue",
@@ -31,15 +32,6 @@ function formatDate(value: string | null): string {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(
     new Date(year, month - 1, day),
   );
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 function LoginScreen({ configured, onAuthenticated }: { configured: boolean; onAuthenticated: () => void }) {
