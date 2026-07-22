@@ -1,0 +1,28 @@
+services:
+  yard-tracker:
+    build: .
+    image: yard-tracker:local
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "${YARD_TRACKER_HOST_PORT:-4173}:4173"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4173
+      TZ: "${TZ:-America/New_York}"
+      YARD_TRACKER_DATA_DIR: /data
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_SECURE: "${SMTP_SECURE:-false}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      SMTP_FROM: "${SMTP_FROM:-Yard Tracker <yard-tracker@example.com>}"
+    volumes:
+      - "${YARD_TRACKER_HOST_DATA_DIR:-./local-data}:/data"
+      - "${YARD_TRACKER_HOST_BACKUP_DIR:-./local-backups}:/backups"
+    tmpfs:
+      - /tmp:size=64m,mode=1777

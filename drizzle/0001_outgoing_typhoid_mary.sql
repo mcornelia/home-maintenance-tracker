@@ -1,0 +1,1 @@
+ALTER TABLE `maintenance_records` ADD `satisfies_due_on` text;
