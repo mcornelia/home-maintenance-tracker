@@ -26,3 +26,25 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: docker build --tag yard-tracker:ci .
+      - name: Smoke-test the production container
+        run: |
+          docker run --detach --name yard-tracker-ci \
+            --read-only \
+            --tmpfs /tmp:size=64m,mode=1777 \
+            --volume yard-tracker-ci-data:/data \
+            --volume yard-tracker-ci-backups:/backups \
+            --publish 127.0.0.1:4173:4173 \
+            yard-tracker:ci
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs yard-tracker-ci
+          exit 1
+      - name: Clean up container smoke test
+        if: always()
+        run: |
+          docker rm --force yard-tracker-ci 2>/dev/null || true
+          docker volume rm yard-tracker-ci-data yard-tracker-ci-backups 2>/dev/null || true
