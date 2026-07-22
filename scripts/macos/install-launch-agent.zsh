@@ -8,6 +8,7 @@ readonly ENV_FILE="$APP_DIR/.env"
 readonly PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 readonly LOG_DIR="$HOME/Library/Logs/Yard Tracker"
 readonly DOMAIN="gui/$(id -u)"
+readonly BOOTSTRAP_ATTEMPTS=10
 
 fail() {
   print -u2 -- "Yard Tracker install: $1"
@@ -70,7 +71,15 @@ chmod 600 "$PLIST_TMP"
 mv -f "$PLIST_TMP" "$PLIST"
 
 launchctl bootout "$DOMAIN/$LABEL" >/dev/null 2>&1 || true
-launchctl bootstrap "$DOMAIN" "$PLIST"
+integer bootstrap_attempt=1
+until launchctl bootstrap "$DOMAIN" "$PLIST"; do
+  if (( bootstrap_attempt >= BOOTSTRAP_ATTEMPTS )); then
+    fail "could not register the LaunchAgent after $BOOTSTRAP_ATTEMPTS attempts"
+  fi
+  print -u2 -- "LaunchAgent registration is not ready; retrying in one second ($bootstrap_attempt/$BOOTSTRAP_ATTEMPTS)."
+  sleep 1
+  (( bootstrap_attempt += 1 ))
+done
 launchctl kickstart -k "$DOMAIN/$LABEL"
 
 readonly PORT="$($NODE_PATH --env-file="$ENV_FILE" -p 'process.env.PORT || "4173"')"
