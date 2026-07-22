@@ -15,8 +15,8 @@
 - [x] Thirty application tests pass.
 - [x] Production application build passes.
 - [x] Native macOS service scripts and generated plist structure are validated.
-- [ ] Docker image builds and its health check passes on a Docker-capable host.
-- [ ] CI passes from the public GitHub repository.
+- [x] Docker image builds and its live container health check passes in GitHub Actions.
+- [x] CI passes from the public GitHub repository.
 
 ## Documentation and community
 
@@ -30,10 +30,10 @@
 
 ## Publication
 
-- [ ] Create `mcornelia/yard-tracker` without starter files.
-- [ ] Add the new GitHub repository as `origin`.
-- [ ] Push `main` only after reviewing the exact first commit.
-- [ ] Enable private vulnerability reporting and secret scanning where available.
-- [ ] Confirm Actions permissions are read-only by default.
-- [ ] Confirm the issue-template security link resolves.
-- [ ] Confirm no household deployment URL appears in repository metadata.
+- [x] Create `mcornelia/yard-tracker` without starter files.
+- [x] Add the new GitHub repository as `origin`.
+- [x] Push `main` only after reviewing the exact first commit.
+- [x] Enable private vulnerability reporting and secret scanning with push protection.
+- [x] Confirm Actions permissions are read-only by default.
+- [x] Confirm the issue-template security link resolves.
+- [x] Confirm no household deployment URL appears in repository metadata.

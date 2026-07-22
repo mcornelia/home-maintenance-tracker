@@ -1,5 +1,7 @@
 # Yard Tracker
 
+[![CI](https://github.com/mcornelia/yard-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/mcornelia/yard-tracker/actions/workflows/ci.yml)
+
 Yard Tracker is a private-by-default, self-hosted household application for remembering how plants, landscaping, and outdoor structures are cared for over time.
 
 Create a card for a group such as “Azaleas,” attach care plans such as applying fertilizer every 90 days, log completed work, and let Yard Tracker calculate what is due next. The same model handles seasonal treatments, one-time work, and long-interval jobs such as pressure-washing a fence.
