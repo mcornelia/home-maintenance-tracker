@@ -10,4 +10,4 @@ if [[ -f "$PLIST" ]]; then
   rm "$PLIST"
   print -- "Removed $PLIST"
 fi
-print -- "Yard Tracker has been stopped and unregistered. Household data, backups, .env, and logs were left untouched."
+print -- "Ravenwood has been stopped and unregistered. Household data, backups, .env, and logs were left untouched."

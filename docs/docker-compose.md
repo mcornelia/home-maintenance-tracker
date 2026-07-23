@@ -29,7 +29,7 @@ YARD_TRACKER_HOST_BACKUP_DIR=/srv/yard-tracker/backups
 YARD_TRACKER_HOST_PORT=4173
 ```
 
-The paths on the right side of the Compose mounts remain `/data` and `/backups`. Configure `/backups` as the backup destination in Yard Tracker settings.
+The paths on the right side of the Compose mounts remain `/data` and `/backups`. Configure `/backups` as the backup destination in Ravenwood settings.
 
 Open `http://SERVER-HOSTNAME.local:4173` from a device on the same LAN and create the shared household passphrase.
 

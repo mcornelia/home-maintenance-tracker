@@ -1,10 +1,10 @@
 # Native Mac installation and recovery
 
-This is the low-overhead installation path for an always-on household Mac. Yard Tracker runs as a user LaunchAgent after that macOS user logs in. Its steady-state application processes are one Node process and SQLite; Docker is not involved.
+This is the low-overhead installation path for an always-on household Mac. Ravenwood runs as a user LaunchAgent after that macOS user logs in. Its steady-state application processes are one Node process and SQLite; Docker is not involved.
 
 ## 1. Prepare the Mac
 
-Install Node.js 22 or newer and pnpm 11, then place the Yard Tracker project in a stable directory that will not be renamed or moved while the service is installed.
+Install Node.js 22 or newer and pnpm 11, then place the Ravenwood project in a stable directory that will not be renamed or moved while the service is installed.
 
 Create the private configuration:
 
@@ -22,7 +22,7 @@ PORT=4173
 TZ=America/New_York
 ```
 
-Do not commit `.env`. SMTP credentials belong there; recipients and digest timing are configured in Yard Tracker itself.
+Do not commit `.env`. SMTP credentials belong there; recipients and digest timing are configured in Ravenwood itself.
 
 ## 2. Install and verify
 
@@ -56,13 +56,13 @@ If macOS asks whether Node may accept incoming connections, allow it on private 
 
 ## 3. Configure backups
 
-In Yard Tracker settings, choose an existing, writable, dedicated folder. It can be local or inside an already-configured sync client:
+In Ravenwood settings, choose an existing, writable, dedicated folder. It can be local or inside an already-configured sync client:
 
 - iCloud Drive: a folder beneath the Mac user's iCloud Drive;
 - Dropbox: a folder beneath the local Dropbox directory; or
 - Google Drive: a folder beneath the local Google Drive mount.
 
-The sync client—not Yard Tracker—handles cloud credentials and transfer. Confirm that a completed `.zip` appears remotely after the first nightly run. Keep the default 30-day retention until a tested household policy replaces it.
+The sync client—not Ravenwood—handles cloud credentials and transfer. Confirm that a completed `.zip` appears remotely after the first nightly run. Keep the default 30-day retention until a tested household policy replaces it.
 
 ## 4. Update the application
 
@@ -86,7 +86,7 @@ This removes only the LaunchAgent registration and its property list. It intenti
 
 Treat restoration as a deliberate maintenance operation:
 
-1. stop Yard Tracker with `pnpm macos:uninstall`;
+1. stop Ravenwood with `pnpm macos:uninstall`;
 2. make a dated copy of the current data directory rather than deleting it;
 3. extract the chosen backup into a temporary directory;
 4. confirm it contains `manifest.json`, `yard-tracker.sqlite`, and the expected `uploads/` files;

@@ -1,6 +1,6 @@
 # Deploy checklist: native household Mac
 
-**Deployment:** Yard Tracker native Mac LaunchAgent  
+**Deployment:** Ravenwood native Mac LaunchAgent
 **Deployer:** Household administrator
 
 ## Before deployment
@@ -11,7 +11,7 @@
 - [ ] `YARD_TRACKER_DATA_DIR` is an absolute, dedicated, owner-only directory outside the repository.
 - [ ] `HOST=0.0.0.0` only if LAN access is intended.
 - [ ] SMTP credentials, if configured, are not present in tracked files.
-- [ ] A recent Yard Tracker backup exists before an update.
+- [ ] A recent Ravenwood backup exists before an update.
 - [ ] `pnpm check`, `pnpm test`, and `pnpm build` pass.
 - [ ] Database migrations have passed against test databases.
 - [ ] The restore procedure and rollback triggers have been reviewed.
@@ -21,11 +21,11 @@
 - [ ] Run `pnpm macos:install` while logged in as the service owner.
 - [ ] Confirm the installer reports a passing health check.
 - [ ] Run `pnpm macos:status`.
-- [ ] Open Yard Tracker locally on the Mac.
-- [ ] Open Yard Tracker from an iPhone or MacBook on the household LAN.
-- [ ] Verify login, dashboard, filtering, one card, activity history, weather, and a private photo.
+- [ ] Open Ravenwood locally on the Mac.
+- [ ] Open Ravenwood from an iPhone or MacBook on the household LAN.
+- [ ] Verify login, overview, filtering, one asset, activity history, weather, and a private photo.
 - [ ] Create a harmless test maintenance record, restart the service, and confirm it persists.
-- [ ] Review both Yard Tracker log files for a restart loop or recurring errors.
+- [ ] Review both Ravenwood log files for a restart loop or recurring errors.
 
 ## After deployment
 

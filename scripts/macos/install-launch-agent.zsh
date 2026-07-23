@@ -11,13 +11,13 @@ readonly DOMAIN="gui/$(id -u)"
 readonly BOOTSTRAP_ATTEMPTS=10
 
 fail() {
-  print -u2 -- "Yard Tracker install: $1"
+  print -u2 -- "Ravenwood install: $1"
   exit 1
 }
 
 [[ "$(uname -s)" == "Darwin" ]] || fail "native service installation is supported on macOS only"
 command -v node >/dev/null || fail "Node.js 22 or newer is required"
-command -v pnpm >/dev/null || fail "pnpm is required to install and build Yard Tracker"
+command -v pnpm >/dev/null || fail "pnpm is required to install and build Ravenwood"
 command -v plutil >/dev/null || fail "macOS plutil was not found"
 
 readonly NODE_PATH="$(command -v node)"
@@ -87,14 +87,14 @@ integer attempt=0
 until /usr/bin/curl --fail --silent --max-time 2 "http://127.0.0.1:$PORT/api/health" >/dev/null; do
   (( attempt += 1 ))
   if (( attempt >= 15 )); then
-    print -u2 -- "Yard Tracker did not become healthy. Recent errors:"
+    print -u2 -- "Ravenwood did not become healthy. Recent errors:"
     /usr/bin/tail -n 20 "$LOG_DIR/yard-tracker-error.log" 2>/dev/null || true
     exit 1
   fi
   sleep 1
 done
 
-print -- "Yard Tracker is running at http://127.0.0.1:$PORT"
+print -- "Ravenwood is running at http://127.0.0.1:$PORT"
 print -- "LAN devices can use this Mac's hostname or LAN IP when HOST=0.0.0.0."
 print -- "Data: $DATA_DIR"
 print -- "Service: $PLIST"

@@ -7,7 +7,7 @@ readonly APP_DIR="${0:A:h:h:h}"
 readonly ENV_FILE="$APP_DIR/.env"
 
 if ! launchctl print "$DOMAIN/$LABEL"; then
-  print -u2 -- "Yard Tracker is not registered for this macOS user."
+  print -u2 -- "Ravenwood is not registered for this macOS user."
   exit 1
 fi
 
