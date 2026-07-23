@@ -30,7 +30,7 @@
     "archiver": "^7.0.1",
     "better-sqlite3": "^13.0.1",
     "cookie": "^1.0.2",
-    "drizzle-orm": "^0.44.5",
+    "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
     "multer": "^2.2.0",
     "nanoid": "^5.1.5",
