@@ -113,6 +113,9 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
 .card-details ul { margin: 0; padding: 0; list-style: none; }
 .card-details li { display: flex; justify-content: space-between; gap: .7rem; padding: .42rem 0; border-bottom: 1px dotted #353a33; }
 .card-details li strong { text-align: right; }
+.card-details .maintenance-item { flex-wrap: wrap; padding: .65rem 0; }
+.maintenance-instructions { flex-basis: 100%; margin: 0; color: #8f978d; font-size: .68rem; line-height: 1.55; }
+.maintenance-instructions a { color: #cf9367; overflow-wrap: anywhere; }
 .history-photo { width: 2rem; height: 2rem; margin: .35rem 0 0; border-radius: .35rem; object-fit: cover; }
 .detail-heading { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; }
 .detail-heading h3 { margin: 0; }

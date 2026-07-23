@@ -49,6 +49,14 @@ function formatDate(value: string | null): string {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(year, month - 1, day));
 }
 
+function linkedInstructions(value: string) {
+  return value.split(/(https?:\/\/[^\s]+)/g).map((part, index) => (
+    part.startsWith("http://") || part.startsWith("https://")
+      ? <a href={part} target="_blank" rel="noreferrer" key={`${part}-${index}`}>{part}</a>
+      : part
+  ));
+}
+
 function weatherIcon(code: number): string {
   if (code === 0) return "☀";
   if (code <= 3) return "⛅";
@@ -192,7 +200,7 @@ function AssetGrid({
                     <div className="card-details">
                       {card.careNotes && <p>{card.careNotes}</p>}
                       <div className="detail-heading"><h3>Maintenance</h3><button type="button" onClick={() => setEditor({ kind: "plan", card })}>Add</button></div>
-                      <ul>{card.plans.map((plan) => <li className="editable-row" key={plan.id}><button type="button" onClick={() => setEditor({ kind: "plan", card, plan })}>{plan.name}{!plan.enabled && " (paused)"}</button><span><strong>{plan.dueOn ? formatDate(plan.dueOn) : stateLabels[plan.state]}</strong><button className="log-button" type="button" onClick={() => setEditor({ kind: "complete", card, plan })}>Log</button></span></li>)}</ul>
+                      <ul className="maintenance-list">{card.plans.map((plan) => <li className="editable-row maintenance-item" key={plan.id}><button type="button" onClick={() => setEditor({ kind: "plan", card, plan })}>{plan.name}{!plan.enabled && " (paused)"}</button><span><strong>{plan.dueOn ? formatDate(plan.dueOn) : stateLabels[plan.state]}</strong><button className="log-button" type="button" onClick={() => setEditor({ kind: "complete", card, plan })}>Log</button></span>{plan.instructions && <p className="maintenance-instructions">{linkedInstructions(plan.instructions)}</p>}</li>)}</ul>
                       <h3>Recent history</h3>
                       {card.recentRecords.length ? <ul>{card.recentRecords.map((record) => <li key={record.id}><span>{record.planName}{record.photoUrls.length > 0 && <img className="history-photo" src={record.photoUrls[0]} alt="" />}</span><strong>{formatDate(record.completedOn)}</strong></li>)}</ul> : <p>No maintenance has been logged yet.</p>}
                       <button className="secondary-button full-button" type="button" onClick={() => setEditor({ kind: "card", card })}>Edit asset</button>
