@@ -254,11 +254,15 @@ function App() {
       });
     return () => controller.abort();
   }, [refreshAll]);
+  useEffect(() => {
+    document.title = dashboard?.household.displayName.trim() || "Ravenwood";
+  }, [dashboard?.household.displayName]);
 
   if (error) return <main className="message-shell"><p className="eyebrow">Ravenwood</p><h1>We couldn’t open the house.</h1><p>{error} Check that the household server is running, then refresh this page.</p></main>;
   if (auth && !auth.authenticated) return <LoginScreen configured={auth.configured} onAuthenticated={() => { setAuth({ configured: true, authenticated: true }); void refreshAll(); }} />;
   if (!auth || !dashboard) return <main className="message-shell" aria-busy="true"><div className="loading-mark">R</div><p>Gathering today’s work…</p></main>;
 
+  const householdName = dashboard.household.displayName;
   const groundsCards = dashboard.cards.filter((card) => card.area === "grounds");
   const householdCards = dashboard.cards.filter((card) => card.area === "household");
   const attentionItems = dashboard.cards
@@ -271,7 +275,7 @@ function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#overview" aria-label="Ravenwood overview"><span className="brand-mark">R</span><span><strong>Ravenwood</strong><small>{dashboard.household.displayName}</small></span></a>
+        <a className="brand" href="#overview" aria-label={`${householdName} overview`}><span className="brand-mark">{initials(householdName)}</span><span><strong>{householdName}</strong><small>Property care</small></span></a>
         <nav aria-label="Primary navigation">
           <a className={view === "overview" ? "active" : ""} href="#overview">Overview</a>
           <a className={view === "grounds" ? "active" : ""} href="#grounds">Grounds</a>
@@ -292,19 +296,19 @@ function App() {
         {view === "overview" && (
           <>
             <section className="home-hero">
-              <div className="hero-content"><p className="eyebrow">Athens, Georgia · {formatDate(dashboard.today)}</p><h1>Ravenwood</h1><p>A home cared for with intention—inside, outside, and across every season.</p></div>
+              <div className="hero-content"><p className="eyebrow">Athens, Georgia · {formatDate(dashboard.today)}</p><h1>{householdName}</h1><p>A home cared for with intention—inside, outside, and across every season.</p></div>
               <a className="hero-scroll" href="#today" aria-label="Jump to today’s maintenance">↓</a>
             </section>
             <section className="today-section" id="today">
-              <div className="today-summary"><p className="eyebrow">Ravenwood today</p><div className="today-number">{attentionCount}</div><h2>{attentionCount === 1 ? "item needs attention." : "items need attention."}</h2><p>{dashboard.counts.overdue} overdue · {dashboard.counts.due + dashboard.counts.due_soon} due or coming soon</p></div>
+              <div className="today-summary"><p className="eyebrow">{householdName} today</p><div className="today-number">{attentionCount}</div><h2>{attentionCount === 1 ? "item needs attention." : "items need attention."}</h2><p>{dashboard.counts.overdue} overdue · {dashboard.counts.due + dashboard.counts.due_soon} due or coming soon</p></div>
               <div className="attention-list">
-                {attentionItems.length ? attentionItems.slice(0, 6).map(({ card, plan }) => <div className="attention-row" key={plan.id}><span className={`attention-state state-${plan.state}`}>{stateLabels[plan.state]}</span><div><strong>{plan.name}</strong><span>{card.name} · {card.area === "grounds" ? "Grounds & Exterior" : "Household"}</span></div><time>{plan.dueOn ? formatDate(plan.dueOn) : stateLabels[plan.state]}</time><button className="log-button" type="button" onClick={() => setEditor({ kind: "complete", card, plan })}>Log</button></div>) : <div className="caught-up"><strong>Everything is on schedule.</strong><span>Ravenwood has nothing due soon.</span></div>}
+                {attentionItems.length ? attentionItems.slice(0, 6).map(({ card, plan }) => <div className="attention-row" key={plan.id}><span className={`attention-state state-${plan.state}`}>{stateLabels[plan.state]}</span><div><strong>{plan.name}</strong><span>{card.name} · {card.area === "grounds" ? "Grounds & Exterior" : "Household"}</span></div><time>{plan.dueOn ? formatDate(plan.dueOn) : stateLabels[plan.state]}</time><button className="log-button" type="button" onClick={() => setEditor({ kind: "complete", card, plan })}>Log</button></div>) : <div className="caught-up"><strong>Everything is on schedule.</strong><span>{householdName} has nothing due soon.</span></div>}
                 {attentionItems.length > 6 && <a className="text-link" href={attentionItems[6].card.area === "grounds" ? "#grounds" : "#household"}>View all {attentionItems.length} items →</a>}
               </div>
             </section>
             <section className="gateway-section" aria-label="Property areas">
               <a className="gateway gateway-grounds" href="#grounds"><p className="eyebrow">Outdoors</p><h2>Grounds<br />& Exterior</h2><p>Landscaping, structures, drainage, lighting, and the living systems around the house.</p><div><strong>{groundsCards.length}</strong><span>assets</span><strong>{areaAttention("grounds")}</strong><span>need attention</span></div><b>Explore grounds →</b></a>
-              <a className="gateway gateway-household" href="#household"><p className="eyebrow">Inside</p><h2>Household<br />Maintenance</h2><p>Mechanical systems, appliances, water, safety equipment, and everything that keeps Ravenwood running.</p><div><strong>{householdCards.length}</strong><span>assets</span><strong>{areaAttention("household")}</strong><span>need attention</span></div><b>Explore household →</b></a>
+              <a className="gateway gateway-household" href="#household"><p className="eyebrow">Inside</p><h2>Household<br />Maintenance</h2><p>Mechanical systems, appliances, water, safety equipment, and everything that keeps {householdName} running.</p><div><strong>{householdCards.length}</strong><span>assets</span><strong>{areaAttention("household")}</strong><span>need attention</span></div><b>Explore household →</b></a>
             </section>
             <section className="overview-activity">
               <div><p className="eyebrow">Shared household record</p><h2>Recently cared for.</h2><a className="text-link" href="#activity">View complete activity →</a></div>
@@ -316,7 +320,7 @@ function App() {
         {view === "household" && <div className="page-intro"><AssetGrid cards={householdCards} locations={dashboard.locations} area="household" setEditor={setEditor} /></div>}
         {view === "activity" && <section className="activity-page"><div className="section-heading"><div><p className="eyebrow">Shared household record</p><h1>Activity</h1></div></div><div className="activity-list">{dashboard.recentActivity.map((record) => <div className="activity-row" key={record.id}><span className="activity-dot" aria-hidden="true" /><div><strong>{record.planName}</strong><span>{record.cardName}{record.notes ? ` · ${record.notes}` : ""}</span></div><time dateTime={record.completedOn}>{formatDate(record.completedOn)}</time></div>)}</div></section>}
       </main>
-      <footer><span>Ravenwood</span><span>Private on your household network</span></footer>
+      <footer><span>{householdName}</span><span>Private on your household network</span></footer>
       {editor && <Editor state={editor} dashboard={dashboard} onClose={() => setEditor(null)} onSaved={refreshAll} />}
     </div>
   );

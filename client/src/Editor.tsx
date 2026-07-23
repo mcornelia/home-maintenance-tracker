@@ -135,12 +135,12 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
-        <div className="editor-heading"><div><p className="eyebrow">Ravenwood</p><h2 id="editor-title">{title}</h2></div><button type="button" onClick={onClose} aria-label="Close editor">×</button></div>
+        <div className="editor-heading"><div><p className="eyebrow">{dashboard.household.displayName}</p><h2 id="editor-title">{title}</h2></div><button type="button" onClick={onClose} aria-label="Close editor">×</button></div>
         <form onSubmit={submit}>
           {state.kind === "settings" && <>
             <label><span>Household name</span><input name="displayName" defaultValue={dashboard.household.displayName} required maxLength={100} /></label>
-            <label><span>Ravenwood masthead photo</span><input name="heroPhoto" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/tiff" /></label>
-            <p className="form-help">Stored privately with the household data and included in Ravenwood backups.</p>
+            <label><span>Masthead photo</span><input name="heroPhoto" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/tiff" /></label>
+            <p className="form-help">Stored privately with the household data and included in household backups.</p>
             <div className="form-row"><label><span>ZIP code</span><input name="zipCode" defaultValue={dashboard.household.zipCode ?? ""} inputMode="numeric" pattern="[0-9]{5}" placeholder="30605" /></label><label><span>Due soon window</span><input name="dueSoonDays" type="number" min="0" max="90" defaultValue={dashboard.household.dueSoonDays} required /></label></div>
             <p className="form-help">ZIP is stored only in your household database and will be used for the display-only forecast.</p>
             <fieldset><legend>Email digest</legend>

@@ -42,6 +42,8 @@ docker compose up --detach --build
 
 Open `http://localhost:4173` and create the shared household passphrase. For another device on the LAN, use the host's `.local` name or LAN IP.
 
+Use **Settings → Household name** to personalize the name shown in the browser title, navigation, masthead, summaries, and email digest.
+
 The container runs as an unprivileged user with a read-only root filesystem. Private state is stored in ignored host directories:
 
 - `./local-data` for SQLite and photos; and
