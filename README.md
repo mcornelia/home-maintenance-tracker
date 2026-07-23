@@ -1,18 +1,20 @@
-# Yard Tracker
+# Ravenwood
 
 [![CI](https://github.com/mcornelia/yard-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/mcornelia/yard-tracker/actions/workflows/ci.yml)
 
-Yard Tracker is a private-by-default, self-hosted household application for remembering how plants, landscaping, and outdoor structures are cared for over time.
+Ravenwood is a private-by-default, self-hosted household application for remembering how an entire property is cared for over time—from plants and exterior structures to appliances, mechanical systems, and safety equipment.
 
-Create a card for a group such as “Azaleas,” attach care plans such as applying fertilizer every 90 days, log completed work, and let Yard Tracker calculate what is due next. The same model handles seasonal treatments, one-time work, and long-interval jobs such as pressure-washing a fence.
+Create an asset such as “Azaleas” or “Main HVAC,” attach maintenance plans, log completed work, and let Ravenwood calculate what is due next. The same model handles seasonal treatments, recurring appliance care, one-time work, and long-interval jobs.
 
-Yard Tracker is intended for one household on a trusted LAN. Each household installs and owns its application, database, photos, SMTP configuration, and backups.
+Ravenwood is intended for one household on a trusted LAN. Each household installs and owns its application, database, photos, SMTP configuration, and backups.
 
 ## Features
 
-The clean foundation, corrected legacy importer, date-only schedule engine, authenticated API, and responsive household dashboard are implemented. The dashboard currently supports:
+The clean foundation, corrected legacy importer, date-only schedule engine, authenticated API, and responsive whole-property dashboard are implemented. The dashboard currently supports:
 
-- card summaries for plants, landscaping, and outdoor wood;
+- Grounds & Exterior and Household asset areas with category and location filters;
+- a whole-property overview for overdue and upcoming work;
+- private household masthead and asset photography;
 - relative, fixed seasonal, and one-time due calculations;
 - location, status, and text filters;
 - expandable care plans and recent maintenance history;
@@ -45,7 +47,7 @@ The container runs as an unprivileged user with a read-only root filesystem. Pri
 - `./local-data` for SQLite and photos; and
 - `./local-backups` for retained backup archives.
 
-In Yard Tracker settings, use `/backups` as the Docker backup destination. To place either directory elsewhere, set `YARD_TRACKER_HOST_DATA_DIR` or `YARD_TRACKER_HOST_BACKUP_DIR` in `.env` before starting Compose. On Linux, those host directories must be writable by UID 1000.
+In Ravenwood settings, use `/backups` as the Docker backup destination. To place either directory elsewhere, set `YARD_TRACKER_HOST_DATA_DIR` or `YARD_TRACKER_HOST_BACKUP_DIR` in `.env` before starting Compose. On Linux, those host directories must be writable by UID 1000.
 
 See the complete [Docker Compose installation and recovery guide](docs/docker-compose.md), including Raspberry Pi and SSD guidance.
 
@@ -106,11 +108,11 @@ Uninstalling only stops and removes the service registration. Household data, `.
 
 Digest recipients, cadence, day, and local delivery time are configured under household settings. SMTP credentials stay in the host environment and are not stored in SQLite or included in backups. Configure `SMTP_HOST` and `SMTP_FROM`; add the port, TLS mode, username, and password required by the mail provider.
 
-The scheduler checks once per minute while Yard Tracker is running. A temporary delivery failure can be retried, but the application records successful periods and will send at most one successful digest per configured daily, weekly, or monthly period. Monthly delivery days are limited to 1–28 so every month has the selected day.
+The scheduler checks once per minute while Ravenwood is running. A temporary delivery failure can be retried, but the application records successful periods and will send at most one successful digest per configured daily, weekly, or monthly period. Monthly delivery days are limited to 1–28 so every month has the selected day.
 
 ## Nightly backups
 
-Set an absolute path to an existing, writable, dedicated backup folder under household settings. This may be a local folder or a folder already synchronized by iCloud Drive, Dropbox, or Google Drive. Yard Tracker does not need credentials for the sync provider.
+Set an absolute path to an existing, writable, dedicated backup folder under household settings. This may be a local folder or a folder already synchronized by iCloud Drive, Dropbox, or Google Drive. Ravenwood does not need credentials for the sync provider.
 
 After 2:00 AM in the household timezone, the running scheduler creates at most one backup per day. Each `yard-tracker-backup-YYYY-MM-DD.zip` contains:
 
@@ -118,7 +120,7 @@ After 2:00 AM in the household timezone, the running scheduler creates at most o
 - private uploaded photos; and
 - a small backup-format manifest.
 
-The archive is built and copied as a private `.partial` file, then renamed into place only after completion. Retention pruning only removes expired ZIP files with Yard Tracker's own backup filename prefix. The default retention is 30 days. A manual **Back up now** action is also available through the authenticated application API.
+The archive is built and copied as a private `.partial` file, then renamed into place only after completion. Retention pruning only removes expired ZIP files with Ravenwood's legacy-compatible backup filename prefix. The default retention is 30 days. A manual **Back up now** action is also available through the authenticated application API.
 
 Backups should be periodically test-restored before relying on them. Cloud synchronization is an additional copy, not a substitute for checking that archives are valid and available.
 

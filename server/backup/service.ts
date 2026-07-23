@@ -36,7 +36,7 @@ async function createZip(database: YardTrackerDatabase, zipPath: string, sqliteS
     archive.pipe(output);
     archive.file(sqliteSnapshot, { name: "yard-tracker.sqlite" });
     if (fs.existsSync(database.paths.uploads)) archive.directory(database.paths.uploads, "uploads");
-    archive.append(JSON.stringify({ application: "Yard Tracker", createdAt, formatVersion: 1 }, null, 2), { name: "manifest.json" });
+    archive.append(JSON.stringify({ application: "Ravenwood", createdAt, formatVersion: 1 }, null, 2), { name: "manifest.json" });
     void archive.finalize();
   });
 }

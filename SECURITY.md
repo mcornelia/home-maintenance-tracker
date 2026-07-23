@@ -12,4 +12,4 @@ Include the affected revision, impact, reproduction steps using fictional data, 
 
 ## Deployment boundary
 
-Yard Tracker is designed for a trusted household LAN behind a router/firewall. It is not hardened for direct exposure to the public internet. Operators are responsible for host updates, network access, SMTP credentials, backup-provider security, and testing restores.
+Ravenwood is designed for a trusted household LAN behind a router/firewall. It is not hardened for direct exposure to the public internet. Operators are responsible for host updates, network access, SMTP credentials, backup-provider security, and testing restores.

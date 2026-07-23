@@ -41,7 +41,14 @@ describe("household login and protected editing", () => {
     const household = request.agent(app);
     await household.post("/api/auth/setup").send({ passphrase: "shared garden phrase" }).expect(201);
     const location = await household.post("/api/locations").send({ name: "Front" }).expect(201);
-    const card = await household.post("/api/cards").send({ name: "Azaleas", description: "Every azalea", locationIds: [location.body.id], enabled: true }).expect(201);
+    const card = await household.post("/api/cards").send({
+      name: "Main Kitchen Dishwasher",
+      area: "household",
+      category: "kitchen",
+      description: "Main kitchen",
+      locationIds: [location.body.id],
+      enabled: true,
+    }).expect(201);
     const plan = await household.post(`/api/cards/${encodeURIComponent(card.body.id)}/plans`).send({
       name: "Osmocote",
       actionType: "osmocote",
@@ -52,7 +59,14 @@ describe("household login and protected editing", () => {
     await household.post(`/api/plans/${encodeURIComponent(plan.body.id)}/complete`).send({ completedOn: "2026-07-22", notes: "Applied to all plants" }).expect(201);
 
     const dashboard = await household.get("/api/dashboard").expect(200);
-    expect(dashboard.body.cards[0]).toMatchObject({ name: "Azaleas", locationNames: ["Front"], state: "upcoming", nextDueOn: "2026-10-20" });
+    expect(dashboard.body.cards[0]).toMatchObject({
+      name: "Main Kitchen Dishwasher",
+      area: "household",
+      category: "kitchen",
+      locationNames: ["Front"],
+      state: "upcoming",
+      nextDueOn: "2026-10-20",
+    });
     expect(dashboard.body.recentActivity[0]).toMatchObject({ planName: "Osmocote", notes: "Applied to all plants" });
   });
 

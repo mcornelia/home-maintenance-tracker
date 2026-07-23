@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to Yard Tracker will be documented here.
+All notable changes to Ravenwood will be documented here.
+
+## 0.2.0
+
+- Expanded the product from yard care to whole-property maintenance.
+- Added Grounds & Exterior and Household asset areas and categories.
+- Added a dark, responsive Ravenwood overview with property-wide attention items.
+- Added a private household masthead photo stored with household backups.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases will use semantic versioning after the first public release.
 

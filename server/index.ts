@@ -59,7 +59,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const server = app.listen(port, host, () => {
-  console.log(`Yard Tracker listening on http://${host}:${port}`);
+  console.log(`Ravenwood listening on http://${host}:${port}`);
 });
 const stopScheduler = startHouseholdScheduler(database);
 

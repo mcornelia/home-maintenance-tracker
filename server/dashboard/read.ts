@@ -5,6 +5,8 @@ interface CardRow {
   id: string;
   slug: string;
   name: string;
+  area: "grounds" | "household";
+  category: string;
   description: string | null;
   careNotes: string | null;
   enabled: number;
@@ -63,6 +65,8 @@ export interface DashboardCard {
   id: string;
   slug: string;
   name: string;
+  area: "grounds" | "household";
+  category: string;
   description: string | null;
   careNotes: string | null;
   enabled: boolean;
@@ -112,7 +116,7 @@ export function readDashboard(sqlite: Database.Database, now = new Date()) {
     .prepare("SELECT display_name AS displayName, timezone, due_soon_days AS dueSoonDays, zip_code AS zipCode, growing_zone AS growingZone, digest_cadence AS digestCadence, digest_day AS digestDay, digest_local_time AS digestLocalTime, backup_destination AS backupDestination, backup_retention_days AS backupRetentionDays FROM household_settings WHERE id = 1")
     .get() as { displayName: string; timezone: string; dueSoonDays: number; zipCode: string | null; growingZone: string | null; digestCadence: "daily" | "weekly" | "monthly"; digestDay: number; digestLocalTime: string; backupDestination: string | null; backupRetentionDays: number } | undefined;
   const household = settings ?? {
-    displayName: "My Yard",
+    displayName: "Ravenwood",
     timezone: "America/New_York",
     dueSoonDays: 14,
     zipCode: null,
@@ -129,7 +133,7 @@ export function readDashboard(sqlite: Database.Database, now = new Date()) {
     .all() as Array<{ id: string; name: string }>;
   const notificationRecipients = (sqlite.prepare("SELECT email FROM notification_recipients WHERE enabled = 1 ORDER BY email").all() as Array<{ email: string }>).map((row) => row.email);
   const cards = sqlite
-    .prepare("SELECT id, slug, name, description, care_notes AS careNotes, enabled, sort_order AS sortOrder, cover_attachment_id AS coverAttachmentId FROM cards WHERE archived_at IS NULL ORDER BY sort_order, name")
+    .prepare("SELECT id, slug, name, area, category, description, care_notes AS careNotes, enabled, sort_order AS sortOrder, cover_attachment_id AS coverAttachmentId FROM cards WHERE archived_at IS NULL ORDER BY sort_order, name")
     .all() as CardRow[];
   const cardLocations = sqlite
     .prepare("SELECT cl.card_id AS cardId, l.id, l.name FROM card_locations cl JOIN locations l ON l.id = cl.location_id WHERE l.archived_at IS NULL ORDER BY l.sort_order, l.name")
@@ -194,6 +198,8 @@ export function readDashboard(sqlite: Database.Database, now = new Date()) {
       id: card.id,
       slug: card.slug,
       name: card.name,
+      area: card.area,
+      category: card.category,
       description: card.description,
       careNotes: card.careNotes,
       enabled: Boolean(card.enabled),

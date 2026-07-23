@@ -40,6 +40,8 @@ export const cards = sqliteTable(
     id: text("id").primaryKey(),
     slug: text("slug").notNull(),
     name: text("name").notNull(),
+    area: text("area", { enum: ["grounds", "household"] }).notNull().default("grounds"),
+    category: text("category").notNull().default("plants_landscaping"),
     description: text("description"),
     careNotes: text("care_notes"),
     coverAttachmentId: text("cover_attachment_id"),

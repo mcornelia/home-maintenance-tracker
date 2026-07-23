@@ -31,6 +31,8 @@ describe("dashboard reader", () => {
     expect(result.counts.due_soon).toBe(1);
     expect(result.cards[0]).toMatchObject({
       name: "Azaleas",
+      area: "grounds",
+      category: "plants_landscaping",
       state: "due_soon",
       nextDueOn: "2026-06-06",
       locationNames: ["Front"],

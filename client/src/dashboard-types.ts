@@ -1,4 +1,19 @@
 export type DueState = "unscheduled" | "upcoming" | "due_soon" | "due" | "overdue" | "completed" | "paused";
+export type AssetArea = "grounds" | "household";
+
+export const assetCategoryLabels = {
+  plants_landscaping: "Plants & landscaping",
+  exterior_drainage: "Exterior & drainage",
+  hvac: "HVAC",
+  water_plumbing: "Water & plumbing",
+  kitchen: "Kitchen",
+  laundry: "Laundry",
+  safety: "Safety",
+  electrical_resilience: "Electrical & resilience",
+  other: "Other",
+} as const;
+
+export type AssetCategory = keyof typeof assetCategoryLabels;
 
 export type Schedule =
   | { scheduleType: "relative"; intervalQuantity: number; intervalUnit: "days" | "weeks" | "months" | "years"; firstDueOn?: string | null }
@@ -21,6 +36,8 @@ export interface DashboardPlan {
 export interface DashboardCard {
   id: string;
   name: string;
+  area: AssetArea;
+  category: AssetCategory;
   description: string | null;
   careNotes: string | null;
   enabled: boolean;
@@ -46,6 +63,6 @@ export interface DashboardData {
 
 export type EditorState =
   | { kind: "settings" }
-  | { kind: "card"; card?: DashboardCard }
+  | { kind: "card"; card?: DashboardCard; defaultArea?: AssetArea }
   | { kind: "plan"; card: DashboardCard; plan?: DashboardPlan }
   | { kind: "complete"; card: DashboardCard; plan: DashboardPlan };

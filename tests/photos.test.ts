@@ -48,6 +48,14 @@ describe("private household photos", () => {
     expect(metadata.xmp).toBeUndefined();
     expect((database.sqlite.prepare("SELECT cover_attachment_id AS id FROM cards WHERE id = 'card'").get() as { id: string }).id).toBe(uploaded.body.id);
     await household.get(`/api/attachments/${encodeURIComponent(uploaded.body.id)}/thumbnail`).expect("Content-Type", /image\/webp/).expect(200);
+
+    await household.post("/api/settings/hero").attach("photo", source, "ravenwood.jpg").expect(201);
+    const heroPath = path.join(database.paths.uploads, "household-hero.webp");
+    expect(fs.statSync(heroPath).mode & 0o777).toBe(0o600);
+    const heroMetadata = await sharp(heroPath).metadata();
+    expect(heroMetadata.format).toBe("webp");
+    expect(heroMetadata.exif).toBeUndefined();
+    await household.get("/api/household/hero").expect("Content-Type", /image\/webp/).expect(200);
   });
 
   it("rejects non-image uploads without leaving attachment rows", async () => {

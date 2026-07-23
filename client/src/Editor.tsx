@@ -1,5 +1,12 @@
 import { useState, type FormEvent } from "react";
-import type { DashboardData, EditorState, Schedule } from "./dashboard-types";
+import {
+  assetCategoryLabels,
+  type AssetArea,
+  type AssetCategory,
+  type DashboardData,
+  type EditorState,
+  type Schedule,
+} from "./dashboard-types";
 
 async function send(url: string, method: string, body: unknown): Promise<{ id?: string }> {
   const response = await fetch(url, { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -34,6 +41,8 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
   const [error, setError] = useState<string | null>(null);
   const [scheduleType, setScheduleType] = useState<"relative" | "fixed" | "one_time" | "none">(() => state.kind === "plan" ? state.plan?.schedule?.scheduleType ?? "relative" : "relative");
   const [digestCadence, setDigestCadence] = useState(dashboard.household.digestCadence);
+  const [assetArea, setAssetArea] = useState<AssetArea>(() => state.kind === "card" ? state.card?.area ?? state.defaultArea ?? "grounds" : "grounds");
+  const [assetCategory, setAssetCategory] = useState<AssetCategory>(() => state.kind === "card" ? state.card?.category ?? ((state.defaultArea ?? "grounds") === "grounds" ? "plants_landscaping" : "other") : "other");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,9 +62,13 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
           backupDestination: value(form, "backupDestination") || null,
           backupRetentionDays: Number(value(form, "backupRetentionDays")),
         });
+        const hero = form.get("heroPhoto");
+        if (hero instanceof File && hero.size > 0) await uploadPhoto("/api/settings/hero", hero);
       } else if (state.kind === "card") {
         const body = {
           name: value(form, "name"),
+          area: assetArea,
+          category: assetCategory,
           description: value(form, "description") || null,
           careNotes: value(form, "careNotes") || null,
           locationIds: form.getAll("locationIds").map(String),
@@ -114,7 +127,7 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
     }
   }
 
-  const title = state.kind === "settings" ? "Household settings" : state.kind === "card" ? (state.card ? `Edit ${state.card.name}` : "Add a yard card") : state.kind === "plan" ? (state.plan ? `Edit ${state.plan.name}` : `Add care for ${state.card.name}`) : `Log ${state.plan.name}`;
+  const title = state.kind === "settings" ? "Household settings" : state.kind === "card" ? (state.card ? `Edit ${state.card.name}` : "Add an asset") : state.kind === "plan" ? (state.plan ? `Edit ${state.plan.name}` : `Add maintenance for ${state.card.name}`) : `Log ${state.plan.name}`;
   const relative = state.kind === "plan" && state.plan?.schedule?.scheduleType === "relative" ? state.plan.schedule : null;
   const fixed = state.kind === "plan" && state.plan?.schedule?.scheduleType === "fixed" ? state.plan.schedule : null;
   const oneTime = state.kind === "plan" && state.plan?.schedule?.scheduleType === "one_time" ? state.plan.schedule : null;
@@ -122,10 +135,12 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
-        <div className="editor-heading"><div><p className="eyebrow">Yard Tracker</p><h2 id="editor-title">{title}</h2></div><button type="button" onClick={onClose} aria-label="Close editor">×</button></div>
+        <div className="editor-heading"><div><p className="eyebrow">Ravenwood</p><h2 id="editor-title">{title}</h2></div><button type="button" onClick={onClose} aria-label="Close editor">×</button></div>
         <form onSubmit={submit}>
           {state.kind === "settings" && <>
             <label><span>Household name</span><input name="displayName" defaultValue={dashboard.household.displayName} required maxLength={100} /></label>
+            <label><span>Ravenwood masthead photo</span><input name="heroPhoto" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/tiff" /></label>
+            <p className="form-help">Stored privately with the household data and included in Ravenwood backups.</p>
             <div className="form-row"><label><span>ZIP code</span><input name="zipCode" defaultValue={dashboard.household.zipCode ?? ""} inputMode="numeric" pattern="[0-9]{5}" placeholder="30605" /></label><label><span>Due soon window</span><input name="dueSoonDays" type="number" min="0" max="90" defaultValue={dashboard.household.dueSoonDays} required /></label></div>
             <p className="form-help">ZIP is stored only in your household database and will be used for the display-only forecast.</p>
             <fieldset><legend>Email digest</legend>
@@ -136,18 +151,24 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
               <p className="form-help">SMTP credentials are configured privately on the host. Current status: {dashboard.smtpConfigured ? "ready" : "not configured yet"}.</p>
             </fieldset>
             <fieldset><legend>Nightly backups</legend>
-              <label><span>Synced backup folder</span><input name="backupDestination" defaultValue={dashboard.household.backupDestination ?? ""} placeholder="/absolute/path/to/Yard Tracker Backups" /></label>
+              <label><span>Synced backup folder</span><input name="backupDestination" defaultValue={dashboard.household.backupDestination ?? ""} placeholder="/absolute/path/to/Ravenwood Backups" /></label>
               <label><span>Retention days</span><input name="backupRetentionDays" type="number" min="1" max="365" defaultValue={dashboard.household.backupRetentionDays} required /></label>
               <p className="form-help">Use a folder inside iCloud Drive, Dropbox, Google Drive, or any mounted local destination. The folder must already exist.</p>
             </fieldset>
           </>}
           {state.kind === "card" && <>
-            <label><span>Card name</span><input name="name" defaultValue={state.card?.name ?? ""} required maxLength={100} autoFocus /></label>
+            <label><span>Asset name</span><input name="name" defaultValue={state.card?.name ?? ""} required maxLength={100} autoFocus /></label>
+            <div className="form-row">
+              <label><span>Area</span><select name="area" value={assetArea} onChange={(event) => { const nextArea = event.target.value as AssetArea; setAssetArea(nextArea); if (!state.card) setAssetCategory(nextArea === "grounds" ? "plants_landscaping" : "other"); }}><option value="grounds">Grounds & Exterior</option><option value="household">Household</option></select></label>
+              <label><span>Category</span><select name="category" value={assetCategory} onChange={(event) => setAssetCategory(event.target.value as AssetCategory)}>
+                {Object.entries(assetCategoryLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </select></label>
+            </div>
             <label><span>What it covers</span><textarea name="description" defaultValue={state.card?.description ?? ""} rows={2} maxLength={500} /></label>
             <label><span>Care notes</span><textarea name="careNotes" defaultValue={state.card?.careNotes ?? ""} rows={4} maxLength={4000} /></label>
             <label><span>{state.card?.coverPhotoUrl ? "Replace cover photo" : "Cover photo (optional)"}</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/tiff" /></label>
             <fieldset><legend>Locations</legend><div className="checkbox-grid">{dashboard.locations.map((location) => <label className="check-label" key={location.id}><input type="checkbox" name="locationIds" value={location.id} defaultChecked={state.card?.locationIds.includes(location.id)} /><span>{location.name}</span></label>)}</div></fieldset>
-            <label className="check-label"><input type="checkbox" name="enabled" defaultChecked={state.card?.enabled ?? true} /><span>Card is active</span></label>
+            <label className="check-label"><input type="checkbox" name="enabled" defaultChecked={state.card?.enabled ?? true} /><span>Asset is active</span></label>
           </>}
           {state.kind === "plan" && <>
             <div className="form-row"><label><span>Maintenance name</span><input name="name" defaultValue={state.plan?.name ?? ""} required autoFocus /></label><label><span>Short type</span><input name="actionType" defaultValue={state.plan?.actionType ?? ""} required /></label></div>

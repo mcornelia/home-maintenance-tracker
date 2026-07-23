@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping make Yard Tracker useful to self-hosting households.
+Thank you for helping make Ravenwood useful to self-hosting households.
 
 ## Ground rules
 

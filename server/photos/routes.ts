@@ -63,6 +63,32 @@ async function normalizePhoto(database: YardTrackerDatabase, file: Express.Multe
 
 export function registerPhotoRoutes(app: Express, database: YardTrackerDatabase): void {
   const authenticated = requireSession(database.sqlite);
+  const householdHeroPath = path.join(database.paths.uploads, "household-hero.webp");
+
+  app.get("/api/household/hero", authenticated, (_request, response) => {
+    if (!fs.existsSync(householdHeroPath)) return void response.status(404).end();
+    response.set({ "Content-Type": "image/webp", "Cache-Control": "private, no-cache", "X-Content-Type-Options": "nosniff" });
+    fs.createReadStream(householdHeroPath).pipe(response);
+  });
+
+  app.post("/api/settings/hero", authenticated, upload.single("photo"), async (request, response, next) => {
+    const temporaryPath = `${householdHeroPath}.partial`;
+    try {
+      if (!request.file) return void response.status(400).json({ error: "Choose a photo to upload" });
+      const source = sharp(request.file.buffer, { failOn: "warning", limitInputPixels: 40_000_000 });
+      const metadata = await source.metadata();
+      if (!metadata.format || !["jpeg", "png", "webp", "heif", "tiff"].includes(metadata.format)) {
+        throw new Error("Use a JPEG, PNG, WebP, HEIC, or TIFF photo");
+      }
+      await source.rotate().resize({ width: 2800, height: 1800, fit: "cover", position: "attention", withoutEnlargement: true }).webp({ quality: 86 }).toFile(temporaryPath);
+      fs.chmodSync(temporaryPath, 0o600);
+      fs.renameSync(temporaryPath, householdHeroPath);
+      response.status(201).json({ url: "/api/household/hero" });
+    } catch (error) {
+      fs.rmSync(temporaryPath, { force: true });
+      next(error);
+    }
+  });
 
   app.get("/api/attachments/:id/:variant?", authenticated, (request, response) => {
     const attachment = database.sqlite.prepare("SELECT stored_path AS storedPath, thumbnail_path AS thumbnailPath FROM attachments WHERE id = ?").get(request.params.id) as { storedPath: string; thumbnailPath: string | null } | undefined;

@@ -20,6 +20,18 @@ function validMonthDay(value: string): boolean {
 
 const dateOnly = z.string().refine(validCalendarDate, "Use a valid calendar date");
 const monthDay = z.string().refine(validMonthDay, "Use a valid MM-DD date");
+const assetArea = z.enum(["grounds", "household"]);
+const assetCategory = z.enum([
+  "plants_landscaping",
+  "exterior_drainage",
+  "hvac",
+  "water_plumbing",
+  "kitchen",
+  "laundry",
+  "safety",
+  "electrical_resilience",
+  "other",
+]);
 const scheduleSchema = z.discriminatedUnion("scheduleType", [
   z.object({
     scheduleType: z.literal("relative"),
@@ -33,6 +45,8 @@ const scheduleSchema = z.discriminatedUnion("scheduleType", [
 
 const cardCreateSchema = z.object({
   name: z.string().trim().min(1).max(100),
+  area: assetArea.default("grounds"),
+  category: assetCategory.default("plants_landscaping"),
   description: z.string().trim().max(500).nullable().optional(),
   careNotes: z.string().trim().max(4000).nullable().optional(),
   locationIds: z.array(z.string().min(1)).max(20).default([]),
@@ -183,8 +197,8 @@ export function registerMutationRoutes(app: Express, sqlite: Database.Database):
     const sortOrder = (sqlite.prepare("SELECT coalesce(max(sort_order), -1) + 1 AS value FROM cards").get() as { value: number }).value;
     try {
       sqlite.transaction(() => {
-        sqlite.prepare("INSERT INTO cards (id, slug, name, description, care_notes, sort_order) VALUES (?, ?, ?, ?, ?, ?)")
-          .run(id, uniqueSlug(sqlite, body.name), body.name, body.description ?? null, body.careNotes ?? null, sortOrder);
+        sqlite.prepare("INSERT INTO cards (id, slug, name, area, category, description, care_notes, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+          .run(id, uniqueSlug(sqlite, body.name), body.name, body.area, body.category, body.description ?? null, body.careNotes ?? null, sortOrder);
         replaceCardLocations(sqlite, id, body.locationIds);
       })();
     } catch (error) {
@@ -202,6 +216,8 @@ export function registerMutationRoutes(app: Express, sqlite: Database.Database):
       sqlite.transaction(() => {
         const updates: Array<[string, unknown]> = [];
         if (body.name !== undefined) updates.push(["name", body.name]);
+        if (body.area !== undefined) updates.push(["area", body.area]);
+        if (body.category !== undefined) updates.push(["category", body.category]);
         if (body.description !== undefined) updates.push(["description", body.description]);
         if (body.careNotes !== undefined) updates.push(["care_notes", body.careNotes]);
         if (body.enabled !== undefined) updates.push(["enabled", body.enabled ? 1 : 0]);
