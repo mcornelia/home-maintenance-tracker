@@ -39,11 +39,12 @@ function value(form: FormData, name: string): string {
   return String(form.get(name) ?? "").trim();
 }
 
-export function Editor({ state, dashboard, onClose, onSaved }: {
+export function Editor({ state, dashboard, onClose, onSaved, onTestCelebration }: {
   state: EditorState;
   dashboard: DashboardData;
   onClose: () => void;
   onSaved: () => Promise<void>;
+  onTestCelebration: () => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,6 +180,9 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
               <label><span>Retention days</span><input name="backupRetentionDays" type="number" min="1" max="365" defaultValue={dashboard.household.backupRetentionDays} required /></label>
               <p className="form-help">Use a folder inside iCloud Drive, Dropbox, Google Drive, or any mounted local destination. The folder must already exist.</p>
             </fieldset>
+            <div className="celebration-test-zone">
+              <button type="button" className="celebration-test-button" aria-label="Preview celebration" title="Preview celebration" onClick={() => { onClose(); onTestCelebration(); }}>A+</button>
+            </div>
           </>}
           {state.kind === "card" && <>
             <label><span>Asset name</span><input name="name" defaultValue={state.card?.name ?? ""} required maxLength={100} autoFocus /></label>

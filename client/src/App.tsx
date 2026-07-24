@@ -142,14 +142,14 @@ function WeatherPanel({ weather, zipCode }: { weather: WeatherResult | null; zip
   );
 }
 
-function CompletionCelebration({ onClose }: { onClose: () => void }) {
+function CompletionCelebration({ householdName, onClose }: { householdName: string; onClose: () => void }) {
   return (
     <div className="celebration-backdrop" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
       <div className="celebration-confetti" aria-hidden="true">
         {Array.from({ length: 18 }, (_, index) => <span key={index} />)}
       </div>
       <section className="celebration-panel">
-        <p className="eyebrow">Ravenwood is caught up</p>
+        <p className="eyebrow">{householdName} is caught up</p>
         <div className="celebration-grade" aria-hidden="true">A+</div>
         <h2 id="celebration-title">Homework complete.</h2>
         <p>Every overdue item is finished. The house is cared for, the list is clear, and that deserves a proper victory lap.</p>
@@ -361,8 +361,8 @@ function App() {
         const completedMaintenance = editor.kind === "complete";
         const nextDashboard = await refreshAll();
         if (completedMaintenance && nextDashboard && shouldCelebrateCompletion(previousOverdue, nextDashboard.counts.overdue)) setCelebrating(true);
-      }} />}
-      {celebrating && <CompletionCelebration onClose={() => setCelebrating(false)} />}
+      }} onTestCelebration={() => setCelebrating(true)} />}
+      {celebrating && <CompletionCelebration householdName={householdName} onClose={() => setCelebrating(false)} />}
     </div>
   );
 }
