@@ -193,7 +193,7 @@ function AssetGrid({
                   <div className="location-line">{assetCategoryLabels[card.category]}{card.locationNames.length ? ` · ${card.locationNames.join(" · ")}` : ""}</div>
                   <h2>{card.name}</h2>
                   <p className="card-description">{card.description || "Ready for household notes and maintenance details."}</p>
-                  <div className="next-action"><span>Next</span><strong>{card.nextDueOn ? formatDate(card.nextDueOn) : stateLabels[card.state]}</strong></div>
+                  <div className="next-action"><span>{card.state === "overdue" ? "Was due" : "Next"}</span><strong>{card.nextDueOn ? formatDate(card.nextDueOn) : stateLabels[card.state]}</strong></div>
                   <div className="plan-chips" aria-label={`${card.name} maintenance plans`}>{activePlans.slice(0, 3).map((plan) => <span key={plan.id}>{plan.name}</span>)}{activePlans.length > 3 && <span>+{activePlans.length - 3}</span>}</div>
                   <button className="details-button" type="button" onClick={() => setExpandedCard(open ? null : card.id)} aria-expanded={open}>{open ? "Hide details" : "View maintenance"}<span aria-hidden="true">{open ? "−" : "+"}</span></button>
                   {open && (
