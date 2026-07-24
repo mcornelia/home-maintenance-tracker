@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Editor } from "./Editor";
+import { shouldCelebrateCompletion } from "./celebration";
 import {
   assetCategoryLabels,
   type AssetArea,
@@ -141,6 +142,23 @@ function WeatherPanel({ weather, zipCode }: { weather: WeatherResult | null; zip
   );
 }
 
+function CompletionCelebration({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="celebration-backdrop" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+      <div className="celebration-confetti" aria-hidden="true">
+        {Array.from({ length: 18 }, (_, index) => <span key={index} />)}
+      </div>
+      <section className="celebration-panel">
+        <p className="eyebrow">Ravenwood is caught up</p>
+        <div className="celebration-grade" aria-hidden="true">A+</div>
+        <h2 id="celebration-title">Homework complete.</h2>
+        <p>Every overdue item is finished. The house is cared for, the list is clear, and that deserves a proper victory lap.</p>
+        <button className="primary-button" type="button" onClick={onClose} autoFocus>Celebrate!</button>
+      </section>
+    </div>
+  );
+}
+
 function AssetGrid({
   cards,
   locations,
@@ -224,24 +242,30 @@ function App() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
   const [weather, setWeather] = useState<WeatherResult | null>(null);
   const [view, setView] = useState<View>(viewFromHash);
 
-  const loadDashboard = useCallback(async () => {
+  const loadDashboard = useCallback(async (): Promise<DashboardData | null> => {
     const response = await fetch("/api/dashboard");
     if (response.status === 401 || response.status === 428) {
       setAuth((current) => ({ configured: response.status === 401 || current?.configured === true, authenticated: false }));
       setDashboard(null);
-      return;
+      return null;
     }
     if (!response.ok) throw new Error("The Ravenwood dashboard could not be loaded.");
-    setDashboard(await response.json() as DashboardData);
+    const nextDashboard = await response.json() as DashboardData;
+    setDashboard(nextDashboard);
+    return nextDashboard;
   }, []);
   const loadWeather = useCallback(async () => {
     const response = await fetch("/api/weather");
     if (response.ok) setWeather(await response.json() as WeatherResult);
   }, []);
-  const refreshAll = useCallback(async () => { await loadDashboard(); await loadWeather(); }, [loadDashboard, loadWeather]);
+  const refreshAll = useCallback(async (): Promise<DashboardData | null> => {
+    const [nextDashboard] = await Promise.all([loadDashboard(), loadWeather()]);
+    return nextDashboard;
+  }, [loadDashboard, loadWeather]);
 
   useEffect(() => {
     const onHashChange = () => setView(viewFromHash());
@@ -332,7 +356,13 @@ function App() {
         {view === "activity" && <section className="activity-page"><div className="section-heading"><div><p className="eyebrow">Shared household record</p><h1>Activity</h1></div></div><div className="activity-list">{dashboard.recentActivity.map((record) => <div className="activity-row" key={record.id}><span className="activity-dot" aria-hidden="true" /><div><strong>{record.planName}</strong><span>{record.cardName}{record.notes ? ` · ${record.notes}` : ""}</span></div><time dateTime={record.completedOn}>{formatDate(record.completedOn)}</time></div>)}</div></section>}
       </main>
       <footer><span>{householdName}</span><span>Private on your household network</span></footer>
-      {editor && <Editor state={editor} dashboard={dashboard} onClose={() => setEditor(null)} onSaved={refreshAll} />}
+      {editor && <Editor state={editor} dashboard={dashboard} onClose={() => setEditor(null)} onSaved={async () => {
+        const previousOverdue = dashboard.counts.overdue;
+        const completedMaintenance = editor.kind === "complete";
+        const nextDashboard = await refreshAll();
+        if (completedMaintenance && nextDashboard && shouldCelebrateCompletion(previousOverdue, nextDashboard.counts.overdue)) setCelebrating(true);
+      }} />}
+      {celebrating && <CompletionCelebration onClose={() => setCelebrating(false)} />}
     </div>
   );
 }
