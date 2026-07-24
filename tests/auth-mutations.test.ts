@@ -73,6 +73,13 @@ describe("household login and protected editing", () => {
     const afterRemoval = await household.get("/api/dashboard").expect(200);
     expect(afterRemoval.body.cards[0].plans).toEqual([]);
     expect(afterRemoval.body.recentActivity[0]).toMatchObject({ planName: "Osmocote", notes: "Applied to all plants" });
+
+    const recordId = afterRemoval.body.recentActivity[0].id;
+    await household.delete(`/api/records/${encodeURIComponent(recordId)}`).expect(204);
+    const afterCorrection = await household.get("/api/dashboard").expect(200);
+    expect(afterCorrection.body.cards[0].recentRecords).toEqual([]);
+    expect(afterCorrection.body.recentActivity).toEqual([]);
+    await household.delete(`/api/records/${encodeURIComponent(recordId)}`).expect(404);
   });
 
   it("saves digest recipients, cadence, and retained-backup settings", async () => {

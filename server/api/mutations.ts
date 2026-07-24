@@ -281,4 +281,9 @@ export function registerMutationRoutes(app: Express, sqlite: Database.Database):
       .run(id, plan.id, plan.cardId, body.completedOn, body.satisfiesDueOn ?? null, body.notes ?? null);
     response.status(201).json({ id });
   });
+
+  app.delete("/api/records/:id", authenticated, (request, response) => {
+    const result = sqlite.prepare("DELETE FROM maintenance_records WHERE id = ?").run(request.params.id);
+    response.status(result.changes ? 204 : 404).end();
+  });
 }

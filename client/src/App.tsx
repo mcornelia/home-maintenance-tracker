@@ -159,18 +159,57 @@ function CompletionCelebration({ householdName, onClose }: { householdName: stri
   );
 }
 
+type RecordToRemove = {
+  cardName: string;
+  record: DashboardCard["recentRecords"][number];
+};
+
+function RemoveRecordDialog({ target, onClose, onRemoved }: { target: RecordToRemove; onClose: () => void; onRemoved: () => Promise<void> }) {
+  const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function removeRecord() {
+    setRemoving(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/records/${encodeURIComponent(target.record.id)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(response.status === 404 ? "That logged activity was already removed." : "The logged activity could not be removed.");
+      await onRemoved();
+      onClose();
+    } catch (removeError) {
+      setError(removeError instanceof Error ? removeError.message : "The logged activity could not be removed.");
+    } finally {
+      setRemoving(false);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="editor-modal removal-dialog" role="dialog" aria-modal="true" aria-labelledby="remove-record-title">
+        <div className="editor-heading"><div><p className="eyebrow">{target.cardName}</p><h2 id="remove-record-title">Remove logged activity?</h2></div><button type="button" onClick={onClose} aria-label="Close confirmation">×</button></div>
+        <p><strong>{target.record.planName}</strong> was logged on {formatDate(target.record.completedOn)}.</p>
+        <p>Removing it will recalculate the next due date. The maintenance plan itself will stay in place.</p>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <div className="form-actions"><button type="button" className="secondary-button" onClick={onClose} disabled={removing}>Keep it</button><button type="button" className="danger-button" onClick={removeRecord} disabled={removing}>{removing ? "Removing…" : "Remove log"}</button></div>
+      </section>
+    </div>
+  );
+}
+
 function AssetGrid({
   cards,
   locations,
   area,
   leadingContent,
   setEditor,
+  onRemoveRecord,
 }: {
   cards: DashboardCard[];
   locations: DashboardData["locations"];
   area: AssetArea;
   leadingContent?: ReactNode;
   setEditor: (value: EditorState | null) => void;
+  onRemoveRecord: (target: RecordToRemove) => void;
 }) {
   const [location, setLocation] = useState("all");
   const [status, setStatus] = useState<"all" | DueState>("all");
@@ -223,7 +262,7 @@ function AssetGrid({
                       <div className="detail-heading"><h3>Maintenance</h3><button type="button" onClick={() => setEditor({ kind: "plan", card })}>Add</button></div>
                       <ul className="maintenance-list">{card.plans.map((plan) => <li className="editable-row maintenance-item" key={plan.id}><button type="button" onClick={() => setEditor({ kind: "plan", card, plan })}>{plan.name}{!plan.enabled && " (paused)"}</button><span><strong>{plan.dueOn ? formatDate(plan.dueOn) : stateLabels[plan.state]}</strong><button className="log-button" type="button" onClick={() => setEditor({ kind: "complete", card, plan })}>Log</button></span>{plan.instructions && <p className="maintenance-instructions">{linkedInstructions(plan.instructions)}</p>}</li>)}</ul>
                       <h3>Recent history</h3>
-                      {card.recentRecords.length ? <ul>{card.recentRecords.map((record) => <li key={record.id}><span>{record.planName}{record.photoUrls.length > 0 && <img className="history-photo" src={record.photoUrls[0]} alt="" />}</span><strong>{formatDate(record.completedOn)}</strong></li>)}</ul> : <p>No maintenance has been logged yet.</p>}
+                      {card.recentRecords.length ? <ul>{card.recentRecords.map((record) => <li className="history-entry" key={record.id}><span>{record.planName}{record.photoUrls.length > 0 && <img className="history-photo" src={record.photoUrls[0]} alt="" />}</span><span><strong>{formatDate(record.completedOn)}</strong><button type="button" className="history-remove-button" onClick={() => onRemoveRecord({ cardName: card.name, record })}>Remove log</button></span></li>)}</ul> : <p>No maintenance has been logged yet.</p>}
                       <button className="secondary-button full-button" type="button" onClick={() => setEditor({ kind: "card", card })}>Edit asset</button>
                     </div>
                   )}
@@ -242,6 +281,7 @@ function App() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [recordToRemove, setRecordToRemove] = useState<RecordToRemove | null>(null);
   const [celebrating, setCelebrating] = useState(false);
   const [weather, setWeather] = useState<WeatherResult | null>(null);
   const [view, setView] = useState<View>(viewFromHash);
@@ -351,8 +391,8 @@ function App() {
             </section>
           </>
         )}
-        {view === "grounds" && <div className="page-intro"><AssetGrid cards={groundsCards} locations={dashboard.locations} area="grounds" leadingContent={<WeatherPanel weather={weather} zipCode={dashboard.household.zipCode} />} setEditor={setEditor} /></div>}
-        {view === "household" && <div className="page-intro"><AssetGrid cards={householdCards} locations={dashboard.locations} area="household" setEditor={setEditor} /></div>}
+        {view === "grounds" && <div className="page-intro"><AssetGrid cards={groundsCards} locations={dashboard.locations} area="grounds" leadingContent={<WeatherPanel weather={weather} zipCode={dashboard.household.zipCode} />} setEditor={setEditor} onRemoveRecord={setRecordToRemove} /></div>}
+        {view === "household" && <div className="page-intro"><AssetGrid cards={householdCards} locations={dashboard.locations} area="household" setEditor={setEditor} onRemoveRecord={setRecordToRemove} /></div>}
         {view === "activity" && <section className="activity-page"><div className="section-heading"><div><p className="eyebrow">Shared household record</p><h1>Activity</h1></div></div><div className="activity-list">{dashboard.recentActivity.map((record) => <div className="activity-row" key={record.id}><span className="activity-dot" aria-hidden="true" /><div><strong>{record.planName}</strong><span>{record.cardName}{record.notes ? ` · ${record.notes}` : ""}</span></div><time dateTime={record.completedOn}>{formatDate(record.completedOn)}</time></div>)}</div></section>}
       </main>
       <footer><span>{householdName}</span><span>Private on your household network</span></footer>
@@ -362,6 +402,7 @@ function App() {
         const nextDashboard = await refreshAll();
         if (completedMaintenance && nextDashboard && shouldCelebrateCompletion(previousOverdue, nextDashboard.counts.overdue)) setCelebrating(true);
       }} onTestCelebration={() => setCelebrating(true)} />}
+      {recordToRemove && <RemoveRecordDialog target={recordToRemove} onClose={() => setRecordToRemove(null)} onRemoved={async () => { await refreshAll(); }} />}
       {celebrating && <CompletionCelebration householdName={householdName} onClose={() => setCelebrating(false)} />}
     </div>
   );
