@@ -14,8 +14,8 @@ import { initials } from "./initials";
 const stateLabels: Record<DueState, string> = {
   overdue: "Overdue",
   due: "Due today",
-  due_soon: "Due soon",
-  upcoming: "Upcoming",
+  due_soon: "Upcoming",
+  upcoming: "On schedule",
   unscheduled: "Not scheduled",
   completed: "Completed",
   paused: "Paused",
@@ -197,7 +197,7 @@ function AssetGrid({
       <div className="controls" aria-label={`Filter ${areaLabel} assets`}>
         <label className="search-control"><span>Search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={area === "grounds" ? "Plants, treatments, locations…" : "Systems, appliances, maintenance…"} /></label>
         <label><span>Location</span><select value={location} onChange={(event) => setLocation(event.target.value)}><option value="all">Everywhere</option>{locations.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        <label><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value as "all" | DueState)}><option value="all">All statuses</option><option value="overdue">Overdue</option><option value="due">Due today</option><option value="due_soon">Due soon</option><option value="upcoming">Upcoming</option><option value="unscheduled">Not scheduled</option><option value="paused">Paused</option></select></label>
+        <label><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value as "all" | DueState)}><option value="all">All statuses</option><option value="overdue">Overdue</option><option value="due">Due today</option><option value="due_soon">Upcoming</option><option value="upcoming">On schedule</option><option value="unscheduled">Not scheduled</option><option value="paused">Paused</option></select></label>
       </div>
       {visibleCards.length ? (
         <div className="card-grid">

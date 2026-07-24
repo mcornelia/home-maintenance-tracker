@@ -166,7 +166,7 @@ export function Editor({ state, dashboard, onClose, onSaved, onTestCelebration }
             <label><span>Household name</span><input name="displayName" defaultValue={dashboard.household.displayName} required maxLength={100} /></label>
             <label><span>Masthead photo</span><input name="heroPhoto" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/tiff" /></label>
             <p className="form-help">Stored privately with the household data and included in household backups.</p>
-            <div className="form-row"><label><span>ZIP code</span><input name="zipCode" defaultValue={dashboard.household.zipCode ?? ""} inputMode="numeric" pattern="[0-9]{5}" placeholder="30605" /></label><label><span>Due soon window</span><input name="dueSoonDays" type="number" min="0" max="90" defaultValue={dashboard.household.dueSoonDays} required /></label></div>
+            <div className="form-row"><label><span>ZIP code</span><input name="zipCode" defaultValue={dashboard.household.zipCode ?? ""} inputMode="numeric" pattern="[0-9]{5}" placeholder="30605" /></label><label><span>Upcoming window</span><input name="dueSoonDays" type="number" min="0" max="90" defaultValue={dashboard.household.dueSoonDays} required /></label></div>
             <p className="form-help">ZIP is stored only in your household database and will be used for the display-only forecast.</p>
             <fieldset><legend>Email digest</legend>
               <label><span>Recipients (comma or line separated)</span><textarea name="notificationRecipients" rows={2} defaultValue={dashboard.notificationRecipients.join(", ")} placeholder="you@example.com, partner@example.com" /></label>

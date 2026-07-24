@@ -15,7 +15,7 @@ function setup() {
     INSERT INTO notification_recipients (id, email) VALUES ('one', 'one@example.com'), ('two', 'two@example.com');
     INSERT INTO cards (id, slug, name) VALUES ('azaleas', 'azaleas', 'Azaleas');
     INSERT INTO maintenance_plans (id, card_id, name, action_type) VALUES ('osmocote', 'azaleas', 'Osmocote', 'osmocote');
-    INSERT INTO plan_schedules (id, plan_id, schedule_type, one_time_due_on) VALUES ('schedule', 'osmocote', 'one_time', '2026-07-22');
+    INSERT INTO plan_schedules (id, plan_id, schedule_type, one_time_due_on) VALUES ('schedule', 'osmocote', 'one_time', '2026-07-30');
   `);
   return database;
 }
@@ -36,6 +36,7 @@ describe("household email digest", () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send.mock.calls[0][0]).toMatchObject({ to: ["one@example.com", "two@example.com"], subject: "Our Yard: 1 items need attention" });
     expect(send.mock.calls[0][0].text).toContain("Azaleas: Osmocote");
+    expect(send.mock.calls[0][0].text).toContain("(upcoming, 2026-07-30)");
     expect(await runDigestIfDue(target.sqlite, options)).toMatchObject({ status: "already_sent" });
     expect(send).toHaveBeenCalledTimes(1);
   });

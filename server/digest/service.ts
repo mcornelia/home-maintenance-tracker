@@ -43,8 +43,9 @@ function renderDigest(sqlite: Database.Database, settings: DigestSettings, now: 
   const items = dashboard.cards.flatMap((card) => card.plans
     .filter((plan) => plan.enabled && plan.includeInDigest && ["overdue", "due", "due_soon"].includes(plan.state))
     .map((plan) => ({ card: card.name, plan: plan.name, state: plan.state, dueOn: plan.dueOn })));
-  const lines = items.length ? items.map((item) => `- ${item.card}: ${item.plan} (${item.state.replace("_", " ")}${item.dueOn ? `, ${item.dueOn}` : ""})`) : ["Nothing is due soon. Ravenwood is caught up."];
-  const rows = items.length ? items.map((item) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.card)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.plan)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.state.replace("_", " "))}${item.dueOn ? ` · ${item.dueOn}` : ""}</td></tr>`).join("") : `<tr><td style="padding:12px" colspan="3">Nothing is due soon. Ravenwood is caught up.</td></tr>`;
+  const stateLabel = (state: string) => state === "due_soon" ? "upcoming" : state === "due" ? "due today" : state;
+  const lines = items.length ? items.map((item) => `- ${item.card}: ${item.plan} (${stateLabel(item.state)}${item.dueOn ? `, ${item.dueOn}` : ""})`) : ["Nothing is upcoming. Ravenwood is caught up."];
+  const rows = items.length ? items.map((item) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.card)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.plan)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(stateLabel(item.state))}${item.dueOn ? ` · ${item.dueOn}` : ""}</td></tr>`).join("") : `<tr><td style="padding:12px" colspan="3">Nothing is upcoming. Ravenwood is caught up.</td></tr>`;
   return {
     subject: `${settings.displayName}: ${items.length ? `${items.length} items need attention` : "all caught up"}`,
     text: [`Ravenwood — ${settings.displayName}`, "", ...lines, "", "Open Ravenwood on your household network for details."].join("\n"),
