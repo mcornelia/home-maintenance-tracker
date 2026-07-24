@@ -30,7 +30,7 @@
 
 ## Publication
 
-- [x] Create `mcornelia/yard-tracker` without starter files.
+- [x] Create and publish `mcornelia/home-maintenance-tracker`.
 - [x] Add the new GitHub repository as `origin`.
 - [x] Push `main` only after reviewing the exact first commit.
 - [x] Enable private vulnerability reporting and secret scanning with push protection.

@@ -1,32 +1,36 @@
-# Ravenwood
+# Home Maintenance Tracker
 
-[![CI](https://github.com/mcornelia/yard-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/mcornelia/yard-tracker/actions/workflows/ci.yml)
+[![CI](https://github.com/mcornelia/home-maintenance-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/mcornelia/home-maintenance-tracker/actions/workflows/ci.yml)
 
-Ravenwood is a private-by-default, self-hosted household application for remembering how an entire property is cared for over time—from plants and exterior structures to appliances, mechanical systems, and safety equipment.
+Home Maintenance Tracker is a private-by-default, self-hosted application for remembering how an entire property is cared for over time—from plants and exterior structures to appliances, mechanical systems, and safety equipment.
 
-Create an asset such as “Azaleas” or “Main HVAC,” attach maintenance plans, log completed work, and let Ravenwood calculate what is due next. The same model handles seasonal treatments, recurring appliance care, one-time work, and long-interval jobs.
+Create an asset such as “Azaleas” or “Main HVAC,” attach maintenance plans, log completed work, and let the application calculate what is due next. The same model handles seasonal treatments, recurring appliance care, one-time work, and long-interval jobs.
 
-Ravenwood is intended for one household on a trusted LAN. Each household installs and owns its application, database, photos, SMTP configuration, and backups.
+Each installation is named by its household. “Ravenwood” is one example; yours might be “Smith House,” “Lake Cottage,” or simply “Home.” The selected name appears throughout the dashboard and email summaries.
+
+The application is intended for one household on a trusted LAN. Each household installs and owns its application, database, photos, SMTP configuration, and backups.
 
 ## Features
 
-The clean foundation, corrected legacy importer, date-only schedule engine, authenticated API, and responsive whole-property dashboard are implemented. The dashboard currently supports:
+- A whole-property overview of overdue, due-soon, and recently completed work
+- Separate Grounds & Exterior and Household areas with search, category, location, and status filters
+- Relative, seasonal, one-time, paused, and unscheduled maintenance plans
+- Completion history that remains intact when a future maintenance plan is removed
+- Private household masthead, asset covers, and dated maintenance photos
+- ZIP-code weather and a five-day forecast for outdoor planning
+- A shared household passphrase with revocable 30-day sessions
+- Configurable daily, weekly, or monthly email digests
+- Automatic SQLite migrations and atomic nightly ZIP backups
+- Native macOS and Docker Compose installation paths
 
-- Grounds & Exterior and Household asset areas with category and location filters;
-- a whole-property overview for overdue and upcoming work;
-- private household masthead and asset photography;
-- relative, fixed seasonal, and one-time due calculations;
-- location, status, and text filters;
-- expandable care plans and recent maintenance history;
-- household-level attention counts and a five-day forecast;
-- automatic SQLite migrations at application startup;
-- shared-passphrase login with revocable 30-day household sessions;
-- authenticated editing for household settings, locations, cards, maintenance plans, and completion records;
-- private card-cover and dated maintenance photos, normalized to WebP with embedded metadata removed;
-- a ZIP-code-based five-day forecast with three-hour caching and a stale-cache fallback for internet outages;
-- configurable daily, weekly, or monthly household email digests; and
-- nightly, atomic ZIP backups with configurable retention; and
-- native macOS and Docker Compose installations.
+## How it works
+
+1. Add an asset: a plant grouping, appliance, mechanical system, safety device, or exterior structure.
+2. Attach one or more maintenance plans with instructions and a schedule.
+3. Log work when it is completed; the next due date is calculated automatically.
+4. Use the overview to see what needs attention across the entire property.
+
+Everything stays on the host you control. Runtime databases, photos, credentials, and backups are excluded from the repository.
 
 This repository is preparing for its first public release. Interfaces and backup formats may change before version 1.0.
 
@@ -42,14 +46,14 @@ docker compose up --detach --build
 
 Open `http://localhost:4173` and create the shared household passphrase. For another device on the LAN, use the host's `.local` name or LAN IP.
 
-Use **Settings → Household name** to personalize the name shown in the browser title, navigation, masthead, summaries, and email digest.
+Use **Settings → Household name** to choose the name shown in the browser title, navigation, masthead, summaries, and email digest.
 
 The container runs as an unprivileged user with a read-only root filesystem. Private state is stored in ignored host directories:
 
 - `./local-data` for SQLite and photos; and
 - `./local-backups` for retained backup archives.
 
-In Ravenwood settings, use `/backups` as the Docker backup destination. To place either directory elsewhere, set `YARD_TRACKER_HOST_DATA_DIR` or `YARD_TRACKER_HOST_BACKUP_DIR` in `.env` before starting Compose. On Linux, those host directories must be writable by UID 1000.
+In household settings, use `/backups` as the Docker backup destination. To place either directory elsewhere, set `YARD_TRACKER_HOST_DATA_DIR` or `YARD_TRACKER_HOST_BACKUP_DIR` in `.env` before starting Compose. On Linux, those host directories must be writable by UID 1000.
 
 See the complete [Docker Compose installation and recovery guide](docs/docker-compose.md), including Raspberry Pi and SSD guidance.
 
@@ -122,7 +126,7 @@ After 2:00 AM in the household timezone, the running scheduler creates at most o
 - private uploaded photos; and
 - a small backup-format manifest.
 
-The archive is built and copied as a private `.partial` file, then renamed into place only after completion. Retention pruning only removes expired ZIP files with Ravenwood's legacy-compatible backup filename prefix. The default retention is 30 days. A manual **Back up now** action is also available through the authenticated application API.
+The archive is built and copied as a private `.partial` file, then renamed into place only after completion. Retention pruning only removes expired ZIP files with the application's legacy-compatible backup filename prefix. The default retention is 30 days. A manual **Back up now** action is also available through the authenticated application API.
 
 Backups should be periodically test-restored before relying on them. Cloud synchronization is an additional copy, not a substitute for checking that archives are valid and available.
 
