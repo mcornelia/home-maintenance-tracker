@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Editor } from "./Editor";
 import {
   assetCategoryLabels,
@@ -145,11 +145,13 @@ function AssetGrid({
   cards,
   locations,
   area,
+  leadingContent,
   setEditor,
 }: {
   cards: DashboardCard[];
   locations: DashboardData["locations"];
   area: AssetArea;
+  leadingContent?: ReactNode;
   setEditor: (value: EditorState | null) => void;
 }) {
   const [location, setLocation] = useState("all");
@@ -173,6 +175,7 @@ function AssetGrid({
         <div><p className="eyebrow">{area === "grounds" ? "Living landscape & exterior" : "Systems, appliances & safety"}</p><h1 id="inventory-heading">{areaLabel}</h1></div>
         <div className="section-actions"><span className="result-count">{visibleCards.length} of {cards.length} assets</span><button className="primary-button compact-button" type="button" onClick={() => setEditor({ kind: "card", defaultArea: area })}>Add asset</button></div>
       </div>
+      {leadingContent}
       <div className="controls" aria-label={`Filter ${areaLabel} assets`}>
         <label className="search-control"><span>Search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={area === "grounds" ? "Plants, treatments, locations…" : "Systems, appliances, maintenance…"} /></label>
         <label><span>Location</span><select value={location} onChange={(event) => setLocation(event.target.value)}><option value="all">Everywhere</option>{locations.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
@@ -324,7 +327,7 @@ function App() {
             </section>
           </>
         )}
-        {view === "grounds" && <><div className="page-intro"><AssetGrid cards={groundsCards} locations={dashboard.locations} area="grounds" setEditor={setEditor} /></div><WeatherPanel weather={weather} zipCode={dashboard.household.zipCode} /></>}
+        {view === "grounds" && <div className="page-intro"><AssetGrid cards={groundsCards} locations={dashboard.locations} area="grounds" leadingContent={<WeatherPanel weather={weather} zipCode={dashboard.household.zipCode} />} setEditor={setEditor} /></div>}
         {view === "household" && <div className="page-intro"><AssetGrid cards={householdCards} locations={dashboard.locations} area="household" setEditor={setEditor} /></div>}
         {view === "activity" && <section className="activity-page"><div className="section-heading"><div><p className="eyebrow">Shared household record</p><h1>Activity</h1></div></div><div className="activity-list">{dashboard.recentActivity.map((record) => <div className="activity-row" key={record.id}><span className="activity-dot" aria-hidden="true" /><div><strong>{record.planName}</strong><span>{record.cardName}{record.notes ? ` · ${record.notes}` : ""}</span></div><time dateTime={record.completedOn}>{formatDate(record.completedOn)}</time></div>)}</div></section>}
       </main>

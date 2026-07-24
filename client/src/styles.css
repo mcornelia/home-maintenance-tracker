@@ -127,7 +127,7 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
 .empty-state { display: grid; gap: .35rem; place-items: center; min-height: 15rem; border: 1px dashed #454a42; border-radius: 1rem; color: #858d82; }
 .empty-state strong { color: #daddd4; }
 
-.weather-panel { margin: 0 0 clamp(4rem, 8vw, 7rem); padding: clamp(1.5rem, 4vw, 2.5rem); border: 1px solid #3b4039; border-radius: 1rem; background: #191c18; }
+.weather-panel { margin: 0 0 2rem; padding: clamp(1.5rem, 4vw, 2.5rem); border: 1px solid #3b4039; border-radius: 1rem; background: #191c18; }
 .forecast-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: end; margin-bottom: 1rem; }
 .forecast-heading .eyebrow { margin-bottom: .3rem; }
 .forecast-heading span { color: #858d82; font-size: .7rem; }
