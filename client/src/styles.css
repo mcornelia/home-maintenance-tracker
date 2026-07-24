@@ -177,6 +177,13 @@ footer { display: flex; justify-content: space-between; gap: 1rem; padding: 2rem
 .check-label span { margin: 0 !important; color: #c9cec5 !important; font-size: .73rem !important; letter-spacing: 0 !important; text-transform: none !important; }
 .form-help { margin: -.25rem 0 0; color: #8b9388; font-size: .7rem; line-height: 1.5; }
 .form-actions { display: flex; justify-content: flex-end; gap: .7rem; margin-top: .5rem; padding-top: 1rem; border-top: 1px solid #41463e; }
+.removal-zone { padding: 1rem; border: 1px solid #5a3d35; border-radius: .75rem; background: #2b211d; }
+.removal-zone > strong { display: block; margin-bottom: .35rem; color: #f0d5ca; }
+.removal-zone > p { margin: 0 0 .9rem; color: #b9a29a; font-size: .72rem; line-height: 1.55; }
+.removal-zone > div { display: flex; justify-content: flex-end; gap: .6rem; }
+.danger-text-button { padding: .25rem 0; border: 0; background: transparent; color: #d18b73; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.danger-button { min-height: 2.75rem; padding: .7rem 1rem; border: 1px solid #9e5e4c; border-radius: .7rem; background: #713a2e; color: #fff0ea; font-weight: 800; cursor: pointer; }
+.danger-button:disabled { cursor: wait; opacity: .65; }
 
 .celebration-backdrop { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; padding: 1rem; overflow: hidden; background: radial-gradient(circle at 50% 38%, rgba(91,73,36,.52), transparent 28rem), rgba(8,10,8,.94); backdrop-filter: blur(.5rem); }
 .celebration-panel { position: relative; z-index: 2; width: min(38rem, 100%); padding: clamp(2rem, 6vw, 4rem); border: 1px solid #88734f; border-radius: 1.5rem; background: linear-gradient(145deg, rgba(40,48,39,.98), rgba(24,26,22,.98)); box-shadow: 0 2rem 8rem rgba(0,0,0,.55); text-align: center; animation: celebration-arrive .65s cubic-bezier(.2,.9,.2,1.15) both; }

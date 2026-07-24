@@ -27,6 +27,14 @@ async function uploadPhoto(url: string, file: File): Promise<void> {
   }
 }
 
+async function remove(url: string): Promise<void> {
+  const response = await fetch(url, { method: "DELETE" });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    throw new Error(result.error ?? "That maintenance item could not be removed");
+  }
+}
+
 function value(form: FormData, name: string): string {
   return String(form.get(name) ?? "").trim();
 }
@@ -39,6 +47,7 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingRemoval, setConfirmingRemoval] = useState(false);
   const [scheduleType, setScheduleType] = useState<"relative" | "fixed" | "one_time" | "none">(() => state.kind === "plan" ? state.plan?.schedule?.scheduleType ?? "relative" : "relative");
   const [digestCadence, setDigestCadence] = useState(dashboard.household.digestCadence);
   const [assetArea, setAssetArea] = useState<AssetArea>(() => state.kind === "card" ? state.card?.area ?? state.defaultArea ?? "grounds" : "grounds");
@@ -127,6 +136,21 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
     }
   }
 
+  async function removeMaintenance() {
+    if (state.kind !== "plan" || !state.plan) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await remove(`/api/plans/${encodeURIComponent(state.plan.id)}`);
+      await onSaved();
+      onClose();
+    } catch (removeError) {
+      setError(removeError instanceof Error ? removeError.message : "That maintenance item could not be removed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const title = state.kind === "settings" ? "Household settings" : state.kind === "card" ? (state.card ? `Edit ${state.card.name}` : "Add an asset") : state.kind === "plan" ? (state.plan ? `Edit ${state.plan.name}` : `Add maintenance for ${state.card.name}`) : `Log ${state.plan.name}`;
   const relative = state.kind === "plan" && state.plan?.schedule?.scheduleType === "relative" ? state.plan.schedule : null;
   const fixed = state.kind === "plan" && state.plan?.schedule?.scheduleType === "fixed" ? state.plan.schedule : null;
@@ -179,6 +203,13 @@ export function Editor({ state, dashboard, onClose, onSaved }: {
             {(scheduleType === "relative" || scheduleType === "fixed") && <label><span>First due date (optional)</span><input name="firstDueOn" type="date" defaultValue={(relative ?? fixed)?.firstDueOn ?? ""} /></label>}
             {scheduleType === "one_time" && <label><span>Due date</span><input name="oneTimeDueOn" type="date" defaultValue={oneTime?.oneTimeDueOn ?? dashboard.today} required /></label>}
             <div className="checkbox-grid"><label className="check-label"><input type="checkbox" name="enabled" defaultChecked={state.plan?.enabled ?? true} /><span>Maintenance is active</span></label><label className="check-label"><input type="checkbox" name="includeInDigest" defaultChecked={state.plan?.includeInDigest ?? true} /><span>Include in email digest</span></label></div>
+            {state.plan && <div className="removal-zone">
+              {!confirmingRemoval ? <button type="button" className="danger-text-button" onClick={() => setConfirmingRemoval(true)}>Remove maintenance</button> : <>
+                <strong>Remove {state.plan.name}?</strong>
+                <p>It will disappear from this asset and future reminders. Previously logged activity will stay in Ravenwood.</p>
+                <div><button type="button" className="secondary-button" onClick={() => setConfirmingRemoval(false)} disabled={saving}>Keep it</button><button type="button" className="danger-button" onClick={removeMaintenance} disabled={saving}>{saving ? "Removing…" : "Remove"}</button></div>
+              </>}
+            </div>}
           </>}
           {state.kind === "complete" && <>
             <label><span>Completed on</span><input name="completedOn" type="date" defaultValue={dashboard.today} required autoFocus /></label>

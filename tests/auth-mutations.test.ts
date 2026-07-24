@@ -68,6 +68,11 @@ describe("household login and protected editing", () => {
       nextDueOn: "2026-10-20",
     });
     expect(dashboard.body.recentActivity[0]).toMatchObject({ planName: "Osmocote", notes: "Applied to all plants" });
+
+    await household.delete(`/api/plans/${encodeURIComponent(plan.body.id)}`).expect(204);
+    const afterRemoval = await household.get("/api/dashboard").expect(200);
+    expect(afterRemoval.body.cards[0].plans).toEqual([]);
+    expect(afterRemoval.body.recentActivity[0]).toMatchObject({ planName: "Osmocote", notes: "Applied to all plants" });
   });
 
   it("saves digest recipients, cadence, and retained-backup settings", async () => {
