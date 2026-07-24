@@ -181,6 +181,10 @@ footer { display: flex; justify-content: space-between; gap: 1rem; padding: 2rem
 .check-label input { flex: none; width: 1rem; min-height: 1rem; }
 .check-label span { margin: 0 !important; color: #c9cec5 !important; font-size: .73rem !important; letter-spacing: 0 !important; text-transform: none !important; }
 .form-help { margin: -.25rem 0 0; color: #8b9388; font-size: .7rem; line-height: 1.5; }
+.area-chip-list { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .85rem; }
+.area-chip-list span { padding: .35rem .55rem; border: 1px solid #454a42; border-radius: 999px; color: #aeb5a9; font-size: .67rem; }
+.area-add-row { display: grid; grid-template-columns: 1fr auto; gap: .65rem; align-items: end; }
+.area-add-row .secondary-button { min-height: 2.85rem; }
 .form-actions { display: flex; justify-content: flex-end; gap: .7rem; margin-top: .5rem; padding-top: 1rem; border-top: 1px solid #41463e; }
 .removal-zone { padding: 1rem; border: 1px solid #5a3d35; border-radius: .75rem; background: #2b211d; }
 .removal-zone > strong { display: block; margin-bottom: .35rem; color: #f0d5ca; }
@@ -254,6 +258,7 @@ footer { display: flex; justify-content: space-between; gap: 1rem; padding: 2rem
   .forecast-days { grid-template-columns: repeat(5, minmax(3.4rem, 1fr)); overflow-x: auto; }
   footer { flex-direction: column; }
   .form-row, .checkbox-grid { grid-template-columns: 1fr; }
+  .area-add-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -27,11 +27,11 @@ async function uploadPhoto(url: string, file: File): Promise<void> {
   }
 }
 
-async function remove(url: string): Promise<void> {
+async function remove(url: string, fallbackMessage: string): Promise<void> {
   const response = await fetch(url, { method: "DELETE" });
   if (!response.ok) {
     const result = await response.json().catch(() => ({})) as { error?: string };
-    throw new Error(result.error ?? "That maintenance item could not be removed");
+    throw new Error(result.error ?? fallbackMessage);
   }
 }
 
@@ -49,6 +49,8 @@ export function Editor({ state, dashboard, onClose, onSaved, onTestCelebration }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmingRemoval, setConfirmingRemoval] = useState(false);
+  const [newAreaName, setNewAreaName] = useState("");
+  const [addingArea, setAddingArea] = useState(false);
   const [scheduleType, setScheduleType] = useState<"relative" | "fixed" | "one_time" | "none">(() => state.kind === "plan" ? state.plan?.schedule?.scheduleType ?? "relative" : "relative");
   const [digestCadence, setDigestCadence] = useState(dashboard.household.digestCadence);
   const [assetArea, setAssetArea] = useState<AssetArea>(() => state.kind === "card" ? state.card?.area ?? state.defaultArea ?? "grounds" : "grounds");
@@ -142,13 +144,44 @@ export function Editor({ state, dashboard, onClose, onSaved, onTestCelebration }
     setSaving(true);
     setError(null);
     try {
-      await remove(`/api/plans/${encodeURIComponent(state.plan.id)}`);
+      await remove(`/api/plans/${encodeURIComponent(state.plan.id)}`, "That maintenance item could not be removed");
       await onSaved();
       onClose();
     } catch (removeError) {
       setError(removeError instanceof Error ? removeError.message : "That maintenance item could not be removed");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function archiveAsset() {
+    if (state.kind !== "card" || !state.card) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await remove(`/api/cards/${encodeURIComponent(state.card.id)}`, "That asset could not be archived");
+      await onSaved();
+      onClose();
+    } catch (archiveError) {
+      setError(archiveError instanceof Error ? archiveError.message : "That asset could not be archived");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function addArea() {
+    const name = newAreaName.trim();
+    if (!name) return;
+    setAddingArea(true);
+    setError(null);
+    try {
+      await send("/api/locations", "POST", { name });
+      setNewAreaName("");
+      await onSaved();
+    } catch (areaError) {
+      setError(areaError instanceof Error ? areaError.message : "That area could not be added");
+    } finally {
+      setAddingArea(false);
     }
   }
 
@@ -180,6 +213,14 @@ export function Editor({ state, dashboard, onClose, onSaved, onTestCelebration }
               <label><span>Retention days</span><input name="backupRetentionDays" type="number" min="1" max="365" defaultValue={dashboard.household.backupRetentionDays} required /></label>
               <p className="form-help">Use a folder inside iCloud Drive, Dropbox, Google Drive, or any mounted local destination. The folder must already exist.</p>
             </fieldset>
+            <fieldset><legend>Areas & locations</legend>
+              <div className="area-chip-list">{dashboard.locations.map((location) => <span key={location.id}>{location.name}</span>)}</div>
+              <div className="area-add-row">
+                <label><span>New area</span><input value={newAreaName} onChange={(event) => setNewAreaName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addArea(); } }} maxLength={100} placeholder="Workshop, Pool, Upstairs…" /></label>
+                <button type="button" className="secondary-button" onClick={addArea} disabled={addingArea || !newAreaName.trim()}>{addingArea ? "Adding…" : "Add area"}</button>
+              </div>
+              <p className="form-help">Areas appear in asset assignments and filters throughout the house.</p>
+            </fieldset>
             <div className="celebration-test-zone">
               <button type="button" className="celebration-test-button" aria-label="Preview celebration" title="Preview celebration" onClick={() => { onClose(); onTestCelebration(); }}>A+</button>
             </div>
@@ -195,8 +236,15 @@ export function Editor({ state, dashboard, onClose, onSaved, onTestCelebration }
             <label><span>What it covers</span><textarea name="description" defaultValue={state.card?.description ?? ""} rows={2} maxLength={500} /></label>
             <label><span>Care notes</span><textarea name="careNotes" defaultValue={state.card?.careNotes ?? ""} rows={4} maxLength={4000} /></label>
             <label><span>{state.card?.coverPhotoUrl ? "Replace cover photo" : "Cover photo (optional)"}</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/tiff" /></label>
-            <fieldset><legend>Locations</legend><div className="checkbox-grid">{dashboard.locations.map((location) => <label className="check-label" key={location.id}><input type="checkbox" name="locationIds" value={location.id} defaultChecked={state.card?.locationIds.includes(location.id)} /><span>{location.name}</span></label>)}</div></fieldset>
+            <fieldset><legend>Areas & locations</legend><div className="checkbox-grid">{dashboard.locations.map((location) => <label className="check-label" key={location.id}><input type="checkbox" name="locationIds" value={location.id} defaultChecked={state.card?.locationIds.includes(location.id)} /><span>{location.name}</span></label>)}</div></fieldset>
             <label className="check-label"><input type="checkbox" name="enabled" defaultChecked={state.card?.enabled ?? true} /><span>Asset is active</span></label>
+            {state.card && <div className="removal-zone">
+              {!confirmingRemoval ? <button type="button" className="danger-text-button" onClick={() => setConfirmingRemoval(true)}>Archive asset</button> : <>
+                <strong>Archive {state.card.name}?</strong>
+                <p>It will disappear from active views and future reminders. Its logged history will remain in Ravenwood.</p>
+                <div><button type="button" className="secondary-button" onClick={() => setConfirmingRemoval(false)} disabled={saving}>Keep it</button><button type="button" className="danger-button" onClick={archiveAsset} disabled={saving}>{saving ? "Archiving…" : "Archive"}</button></div>
+              </>}
+            </div>}
           </>}
           {state.kind === "plan" && <>
             <div className="form-row"><label><span>Maintenance name</span><input name="name" defaultValue={state.plan?.name ?? ""} required autoFocus /></label><label><span>Short type</span><input name="actionType" defaultValue={state.plan?.actionType ?? ""} required /></label></div>

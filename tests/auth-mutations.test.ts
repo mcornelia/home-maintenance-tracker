@@ -75,9 +75,15 @@ describe("household login and protected editing", () => {
     expect(afterRemoval.body.recentActivity[0]).toMatchObject({ planName: "Osmocote", notes: "Applied to all plants" });
 
     const recordId = afterRemoval.body.recentActivity[0].id;
+    await household.delete(`/api/cards/${encodeURIComponent(card.body.id)}`).expect(204);
+    const afterArchive = await household.get("/api/dashboard").expect(200);
+    expect(afterArchive.body.cards).toEqual([]);
+    expect(afterArchive.body.recentActivity[0]).toMatchObject({ cardName: "Main Kitchen Dishwasher", planName: "Osmocote" });
+    await household.delete(`/api/cards/${encodeURIComponent(card.body.id)}`).expect(404);
+
     await household.delete(`/api/records/${encodeURIComponent(recordId)}`).expect(204);
     const afterCorrection = await household.get("/api/dashboard").expect(200);
-    expect(afterCorrection.body.cards[0].recentRecords).toEqual([]);
+    expect(afterCorrection.body.cards).toEqual([]);
     expect(afterCorrection.body.recentActivity).toEqual([]);
     await household.delete(`/api/records/${encodeURIComponent(recordId)}`).expect(404);
   });

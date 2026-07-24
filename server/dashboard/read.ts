@@ -38,6 +38,7 @@ interface RecordRow {
   satisfiesDueOn: DateOnly | null;
   notes: string | null;
   planName: string | null;
+  cardName: string | null;
 }
 
 export interface DashboardPlan {
@@ -148,8 +149,10 @@ export function readDashboard(sqlite: Database.Database, now = new Date()) {
     .all() as PlanRow[];
   const records = sqlite
     .prepare(`SELECT r.id, r.plan_id AS planId, r.card_id AS cardId, r.completed_on AS completedOn,
-      r.satisfies_due_on AS satisfiesDueOn, r.notes, p.name AS planName
-      FROM maintenance_records r LEFT JOIN maintenance_plans p ON p.id = r.plan_id
+      r.satisfies_due_on AS satisfiesDueOn, r.notes, p.name AS planName, c.name AS cardName
+      FROM maintenance_records r
+      LEFT JOIN maintenance_plans p ON p.id = r.plan_id
+      LEFT JOIN cards c ON c.id = r.card_id
       ORDER BY r.completed_on DESC, r.created_at DESC`)
     .all() as RecordRow[];
   const attachmentRows = sqlite
@@ -230,7 +233,7 @@ export function readDashboard(sqlite: Database.Database, now = new Date()) {
     cards: dashboardCards,
     recentActivity: records.slice(0, 8).map((record) => ({
       id: record.id,
-      cardName: cards.find((card) => card.id === record.cardId)?.name ?? "Unknown card",
+      cardName: record.cardName ?? "Unknown asset",
       planName: record.planName ?? "Maintenance",
       completedOn: record.completedOn,
       notes: record.notes,
